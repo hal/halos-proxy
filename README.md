@@ -11,9 +11,7 @@ halOS consists of two parts:
 1. Proxy
 2. Console
 
-### Proxy
-
-The proxy is a server side application running in a pod next to the WildFly instances. It talks to the management endpoints of the WildFly instances and collects data from these instances. 
+This repository contains the proxy. The proxy is a server side application running in a pod next to the WildFly instances. It talks to the management endpoints of the WildFly instances and collects data from these instances. 
 
 #### Technical Stack
 
@@ -25,11 +23,4 @@ The proxy is a server side application running in a pod next to the WildFly inst
 
 ### Console
 
-The console is a [RIA](https://en.wikipedia.org/wiki/Rich_web_application) / [SPA](https://en.wikipedia.org/wiki/Single-page_application) based on [HAL](https://hal.github.io/). The UI follows the design guidelines from [PatternFly](https://www.patternfly.org/v4/). 
-
-#### Technical Stack
-
-- GWT
-- [Elemento](https://github.com/hal/elemento)
-- [Crysknife](https://github.com/treblereel/crysknife)
-- [PatternFly Java](https://github.com/patternfly-java/)
+The [console](https://github.com/hal/halos-console) is a [RIA](https://en.wikipedia.org/wiki/Rich_web_application) / [SPA](https://en.wikipedia.org/wiki/Single-page_application). The UI follows the design guidelines from [PatternFly](https://www.patternfly.org/v4/). 
