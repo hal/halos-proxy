@@ -3,7 +3,7 @@ package org.wildfly.halos.proxy;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
@@ -26,14 +26,14 @@ import org.jboss.dmr.ModelNode;
 import org.jboss.logging.Logger;
 import org.wildfly.halos.proxy.InstanceModification.Modification;
 
-import static java.util.Collections.unmodifiableList;
+import static java.util.Collections.synchronizedSortedMap;
 
 /** Manages connections to the WildFly management endpoints and execute DMR operations. */
 @ApplicationScoped
 class Instances {
 
     private static final String REMOTE_HTTP = "remote+http";
-    private static Logger log = Logger.getLogger("halos.proxy.dispatcher");
+    private static final Logger log = Logger.getLogger("halos.proxy.dispatcher");
 
     private final SortedMap<Instance, ModelControllerClient> clients;
     private final UnicastProcessor<InstanceModification> processor;
@@ -41,7 +41,7 @@ class Instances {
 
     @Inject
     Instances() {
-        this.clients = new TreeMap<>();
+        this.clients = synchronizedSortedMap(new TreeMap<>());
         this.processor = UnicastProcessor.create();
         this.modifications = processor
                 .broadcast().toAllSubscribers()
@@ -107,7 +107,7 @@ class Instances {
     }
 
     public List<Instance> instances() {
-        return unmodifiableList(new ArrayList<>(clients.keySet()));
+        return List.copyOf(clients.keySet());
     }
 
     Multi<InstanceModification> modifications() {
