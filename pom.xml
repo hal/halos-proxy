@@ -51,11 +51,11 @@
 
         <compiler-plugin.version>3.8.1</compiler-plugin.version>
         <docker-plugin.version>0.33.0</docker-plugin.version>
-        <quarkus-plugin.version>1.4.2.Final</quarkus-plugin.version>
+        <quarkus-plugin.version>1.5.0.Final</quarkus-plugin.version>
         <surefire-plugin.version>2.22.1</surefire-plugin.version>
 
         <jackson.version>2.10.2</jackson.version>
-        <quarkus.platform.version>1.4.2.Final</quarkus.platform.version>
+        <quarkus.platform.version>1.5.0.Final</quarkus.platform.version>
         <quarkus-wildfly-client.version>0.0.1</quarkus-wildfly-client.version>
         <testcontainers.version>1.12.5</testcontainers.version>
     </properties>
