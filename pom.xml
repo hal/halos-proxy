@@ -74,6 +74,19 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.wildfly.halos</groupId>
+            <artifactId>halos-console</artifactId>
+            <classifier>resources</classifier>
+            <version>${project.version}</version>
+            <exclusions>
+                <!-- Just the resources please -->
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-resteasy</artifactId>
         </dependency>
