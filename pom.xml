@@ -51,11 +51,12 @@
 
         <compiler-plugin.version>3.8.1</compiler-plugin.version>
         <docker-plugin.version>0.33.0</docker-plugin.version>
-        <quarkus-plugin.version>1.5.0.Final</quarkus-plugin.version>
+        <quarkus-plugin.version>1.5.1.Final</quarkus-plugin.version>
         <surefire-plugin.version>2.22.1</surefire-plugin.version>
 
+        <halos-console-version>0.0.1</halos-console-version>
         <jackson.version>2.10.2</jackson.version>
-        <quarkus.platform.version>1.5.0.Final</quarkus.platform.version>
+        <quarkus.platform.version>1.5.1.Final</quarkus.platform.version>
         <quarkus-wildfly-client.version>0.0.1</quarkus-wildfly-client.version>
         <testcontainers.version>1.12.5</testcontainers.version>
     </properties>
@@ -77,14 +78,7 @@
             <groupId>org.wildfly.halos</groupId>
             <artifactId>halos-console</artifactId>
             <classifier>resources</classifier>
-            <version>${project.version}</version>
-            <exclusions>
-                <!-- Just the resources please -->
-                <exclusion>
-                    <groupId>*</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
+            <version>${halos-console-version}</version>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
@@ -97,6 +91,10 @@
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-resteasy-jsonb</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-container-image-jib</artifactId>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
@@ -153,10 +151,10 @@
                 <artifactId>docker-maven-plugin</artifactId>
                 <version>${docker-plugin.version}</version>
                 <configuration>
-                    <containerNamePattern>halos_%a</containerNamePattern>
+                    <containerNamePattern>halos_wf_%a</containerNamePattern>
                     <images>
                         <image>
-                            <name>halos/wildfly</name>
+                            <name>halconsole/wildfly</name>
                             <alias>wf0</alias>
                             <build>
                                 <contextDir>${basedir}/src/test/docker</contextDir>
@@ -172,7 +170,7 @@
                             </run>
                         </image>
                         <image>
-                            <name>halos/wildfly</name>
+                            <name>halconsole/wildfly</name>
                             <alias>wf1</alias>
                             <run>
                                 <ports>
@@ -185,7 +183,7 @@
                             </run>
                         </image>
                         <image>
-                            <name>halos/wildfly</name>
+                            <name>halconsole/wildfly</name>
                             <alias>wf2</alias>
                             <run>
                                 <ports>
@@ -261,7 +259,8 @@
             </activation>
             <properties>
                 <quarkus.package.type>native</quarkus.package.type>
-                <quarkus.native.additional-build-args>-H:+TraceClassInitialization</quarkus.native.additional-build-args>
+                <quarkus.native.additional-build-args>-H:+TraceClassInitialization
+                </quarkus.native.additional-build-args>
             </properties>
             <build>
                 <plugins>
