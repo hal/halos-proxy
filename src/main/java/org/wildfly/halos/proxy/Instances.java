@@ -1,9 +1,9 @@
 package org.wildfly.halos.proxy;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
@@ -116,7 +116,7 @@ class Instances {
 
     ModelNode execute(Operation operation) {
         ModelNode result = new ModelNode();
-        clients.forEach((instance, client) -> executeAndWrap(client, operation, instance, result));
+        clients.forEach((instance, client) -> executeAndWrap(instance.name, client, operation, instance, result));
         return result;
     }
 
@@ -124,7 +124,7 @@ class Instances {
         Map.Entry<Instance, ModelControllerClient> entry = findByName(name);
         if (entry != null) {
             ModelNode result = new ModelNode();
-            executeAndWrap(entry.getValue(), operation, entry.getKey(), result);
+            executeAndWrap(name, entry.getValue(), operation, entry.getKey(), result);
             return result;
         } else {
             log.errorf("Unable to find client for instance %1s. Did you register %1s?", name);
@@ -132,7 +132,7 @@ class Instances {
         }
     }
 
-    private void executeAndWrap(ModelControllerClient client, Operation operation,
+    private void executeAndWrap(String name, ModelControllerClient client, Operation operation,
             Instance instance, ModelNode modelNode) {
         ModelNode result;
         try {
@@ -140,6 +140,9 @@ class Instances {
         } catch (IOException e) {
             log.errorf("Error executing operation %s against %s: %s",
                     operation.getOperation().toJSONString(true), instance, e.getMessage());
+            if (e.getCause() instanceof ConnectException) {
+                unregister(name);
+            }
             result = new ModelNode();
             result.get(ClientConstants.OUTCOME).set("failed");
             result.get(ClientConstants.FAILURE_DESCRIPTION).set(e.getMessage());
