@@ -55,7 +55,7 @@
         <surefire-plugin.version>2.22.1</surefire-plugin.version>
 
         <halos-console-version>0.0.1</halos-console-version>
-        <jackson.version>2.10.2</jackson.version>
+        <jackson.version>2.10.5.1</jackson.version>
         <quarkus.platform.version>1.7.0.Final</quarkus.platform.version>
         <quarkus-wildfly-client.version>0.0.1</quarkus-wildfly-client.version>
         <testcontainers.version>1.12.5</testcontainers.version>
