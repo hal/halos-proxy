@@ -27,7 +27,7 @@
 
     <groupId>org.wildfly.halos</groupId>
     <artifactId>halos-proxy</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>halOS Proxy</name>
     <description>HAL on OpenShift</description>
@@ -83,9 +83,8 @@
         <version.junit>5.9.1</version.junit>
         <version.quarkus>2.14.1.Final</version.quarkus>
         <version.quarkus.quinoa>1.2.3</version.quarkus.quinoa>
-        <version.wildfly.quarkus>0.0.1</version.wildfly.quarkus>
+        <version.wildfly.quarkus>0.0.1-SNAPSHOT</version.wildfly.quarkus>
         <version.testcontainers>1.17.5</version.testcontainers>
-        <version.wildfly.quarkus>0.0.1</version.wildfly.quarkus>
 
         <!-- Plugin versions -->
         <version.checkstyle.plugin>3.2.0</version.checkstyle.plugin>
@@ -276,6 +275,18 @@
                         </rules>
                     </configuration>
                 </plugin>
+                    <plugin>
+                        <groupId>org.sonatype.plugins</groupId>
+                        <artifactId>nexus-staging-maven-plugin</artifactId>
+                        <version>${version.nexus.staging.plugin}</version>
+                        <extensions>true</extensions>
+                    </plugin>
+                    <plugin>
+                        <groupId>${quarkus.platform.group-id}</groupId>
+                        <artifactId>quarkus-maven-plugin</artifactId>
+                        <version>${version.quarkus}</version>
+                        <extensions>true</extensions>
+                    </plugin>
             </plugins>
         </pluginManagement>
 
@@ -408,7 +419,6 @@
             <plugin>
                 <groupId>${quarkus.platform.group-id}</groupId>
                 <artifactId>quarkus-maven-plugin</artifactId>
-                <version>${version.quarkus}</version>
                 <extensions>true</extensions>
                 <executions>
                     <execution>
@@ -507,7 +517,6 @@
                     <plugin>
                         <groupId>org.sonatype.plugins</groupId>
                         <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <version>${version.nexus.staging.plugin}</version>
                         <extensions>true</extensions>
                         <configuration>
                             <serverId>ossrh</serverId>
