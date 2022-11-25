@@ -118,7 +118,7 @@ parse_params "$@"
 setup_colors
 
 FINAL_VERSION="${RELEASE_VERSION}.Final"
-GIT_REMOTES=("origin upstream")
+GIT_REMOTES=("origin")
 SNAPSHOT_VERSION="${NEXT_VERSION}-SNAPSHOT"
 TAG="v${RELEASE_VERSION}"
 WORKFLOW_URL="https://github.com/hal/halos-proxy/actions/workflows/release.yml"
