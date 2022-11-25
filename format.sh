@@ -17,7 +17,10 @@
 
 # --------------------------------------------------
 #
-# Bumps the version in Maven POMs and GWT modules
+# Formats the source code by applying
+#   - license-maven-plugin
+#   - formatter-maven-plugin
+#   - impsort-maven-plugin
 #
 # --------------------------------------------------
 
@@ -35,15 +38,12 @@ cd "${script_dir}"
 usage() {
   cat <<EOF
 USAGE:
-    $(basename "${BASH_SOURCE[0]}") [FLAGS] <version>
+    $(basename "${BASH_SOURCE[0]}") [FLAGS]
 
 FLAGS:
     -h, --help          Prints help information
     -v, --version       Prints version information
     --no-color          Uses plain text output
-
-ARGS:
-    <version>           The new version
 EOF
   exit
 }
@@ -89,15 +89,12 @@ parse_params() {
     shift
   done
 
-  ARGS=("$@")
-  [[ ${#ARGS[@]} -eq 0 ]] && die "Missing new version"
-  NEW_VERSION=${ARGS[0]}
-
   return 0
 }
 
 parse_params "$@"
 setup_colors
-
-msg "Update version to ${CYAN}${NEW_VERSION}${NOFORMAT}"
-mvn --quiet versions:set -DnewVersion="${NEW_VERSION}" &>/dev/null
+mvn \
+  com.mycila:license-maven-plugin:format \
+  net.revelc.code.formatter:formatter-maven-plugin:format \
+  net.revelc.code:impsort-maven-plugin:sort
