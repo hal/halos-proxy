@@ -1,6 +1,6 @@
 # halOS Proxy
 
-halOS stands for HAL on OpenShift. It's a special [HAL](https://hal.github.io/) edition for WildFly instances managed by the  [WildFly operator](https://github.com/wildfly/wildfly-operator) and running on OpenShift.
+halOS stands for HAL on OpenShift. It's a special [HAL](https://hal.github.io/) edition for WildFly instances running on OpenShift.
 
 ## Architecture
 
