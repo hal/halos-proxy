@@ -40,6 +40,7 @@ import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerPort;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodList;
+import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.openshift.client.OpenShiftClient;
 import io.quarkus.runtime.StartupEvent;
 
@@ -67,24 +68,29 @@ class Discovery {
             }
         }
         log.infof("Lookup pods using labels %s", podLabels);
-        PodList pods = oc.pods().withLabels(podLabels).list();
-        log.infof("Found %d pods", pods.getItems().size());
-        for (Pod pod : pods.getItems()) {
-            for (Container container : pod.getSpec().getContainers()) {
-                for (ContainerPort port : container.getPorts()) {
-                    log.infof("Pod %s, container %s, port: %d", pod.getMetadata().getUid(), container.getName(),
-                            port.getContainerPort());
-                    if (port.getContainerPort() == 9990) {
-                        ModelControllerClient client = connect(pod.getStatus().getPodIP(), 9990);
-                        if (client != null) {
-                            ModelNode result = readRootResource(client);
-                            if (result != null) {
-                                log.info(result.toJSONString(false));
+
+        try {
+            PodList pods = oc.pods().withLabels(podLabels).list();
+            log.infof("Found %d pods", pods.getItems().size());
+            for (Pod pod : pods.getItems()) {
+                for (Container container : pod.getSpec().getContainers()) {
+                    for (ContainerPort port : container.getPorts()) {
+                        log.infof("Pod %s, container %s, port: %d", pod.getMetadata().getUid(), container.getName(),
+                                port.getContainerPort());
+                        if (port.getContainerPort() == 9990) {
+                            ModelControllerClient client = connect(pod.getStatus().getPodIP(), 9990);
+                            if (client != null) {
+                                ModelNode result = readRootResource(client);
+                                if (result != null) {
+                                    log.info(result.toJSONString(false));
+                                }
                             }
                         }
                     }
                 }
             }
+        } catch (KubernetesClientException e) {
+            log.errorf("Unable to read pods: %s", e.getMessage());
         }
     }
 
