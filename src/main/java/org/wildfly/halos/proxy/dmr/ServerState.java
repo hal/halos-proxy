@@ -13,15 +13,9 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.wildfly.halos.proxy;
+package org.wildfly.halos.proxy.dmr;
 
-import org.wildfly.halos.proxy.dmr.RunningMode;
-import org.wildfly.halos.proxy.dmr.ServerState;
-import org.wildfly.halos.proxy.dmr.SuspendState;
-
-import de.skuzzle.semantic.Version;
-
-public record Instance(String containerId, String serverId, String serverName, String productName, Version productVersion,
-        Version coreVersion, Version managementVersion, RunningMode runningMode, ServerState serverState,
-        SuspendState suspendState) {
+/** State as defined by {@code server.server-state} */
+public enum ServerState {
+    STARTING, RUNNING, STOPPED, RESTART_REQUIRED, RELOAD_REQUIRED, UNDEFINED
 }

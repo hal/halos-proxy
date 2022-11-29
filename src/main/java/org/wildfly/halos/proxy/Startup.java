@@ -15,13 +15,19 @@
  */
 package org.wildfly.halos.proxy;
 
-import org.wildfly.halos.proxy.dmr.RunningMode;
-import org.wildfly.halos.proxy.dmr.ServerState;
-import org.wildfly.halos.proxy.dmr.SuspendState;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
-import de.skuzzle.semantic.Version;
+import io.quarkus.scheduler.Scheduled;
 
-public record Instance(String containerId, String serverId, String serverName, String productName, Version productVersion,
-        Version coreVersion, Version managementVersion, RunningMode runningMode, ServerState serverState,
-        SuspendState suspendState) {
+@ApplicationScoped
+class Startup {
+
+    @Inject
+    Instances instances;
+
+    @Scheduled(every = "2s")
+    void lookup() {
+        instances.refresh();
+    }
 }

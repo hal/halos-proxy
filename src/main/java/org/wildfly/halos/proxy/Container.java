@@ -15,9 +15,5 @@
  */
 package org.wildfly.halos.proxy;
 
-public class ManagementException extends RuntimeException {
-
-    public ManagementException(String message, Throwable cause) {
-        super(message, cause);
-    }
+public record Container(String id, String ip, int port) {
 }

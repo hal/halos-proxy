@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.wildfly.halos.proxy;
+package org.wildfly.halos.proxy.dmr;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -29,11 +29,11 @@ import javax.ws.rs.ext.Provider;
 
 import org.jboss.dmr.ModelNode;
 
-import static org.wildfly.halos.proxy.ManagementResource.DMR_ENCODED;
-
 @Provider
-@Produces(DMR_ENCODED)
+@Produces(ModelNodeMessageBodyWriter.DMR_ENCODED)
 public class ModelNodeMessageBodyWriter implements MessageBodyWriter<ModelNode> {
+
+    public static final String DMR_ENCODED = "application/dmr-encoded";
 
     @Override
     public boolean isWriteable(Class<?> aClass, Type type, Annotation[] annotations, MediaType mediaType) {

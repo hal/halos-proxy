@@ -13,15 +13,11 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.wildfly.halos.proxy;
+package org.wildfly.halos.proxy.dmr;
 
-import org.wildfly.halos.proxy.dmr.RunningMode;
-import org.wildfly.halos.proxy.dmr.ServerState;
-import org.wildfly.halos.proxy.dmr.SuspendState;
+public class DispatchException extends RuntimeException {
 
-import de.skuzzle.semantic.Version;
-
-public record Instance(String containerId, String serverId, String serverName, String productName, Version productVersion,
-        Version coreVersion, Version managementVersion, RunningMode runningMode, ServerState serverState,
-        SuspendState suspendState) {
+    public DispatchException(final String message, final Throwable cause) {
+        super(message, cause);
+    }
 }

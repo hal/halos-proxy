@@ -15,13 +15,30 @@
  */
 package org.wildfly.halos.proxy;
 
-import org.wildfly.halos.proxy.dmr.RunningMode;
-import org.wildfly.halos.proxy.dmr.ServerState;
-import org.wildfly.halos.proxy.dmr.SuspendState;
+import java.util.HashSet;
+import java.util.Set;
 
-import de.skuzzle.semantic.Version;
+class ContainerDiff {
 
-public record Instance(String containerId, String serverId, String serverName, String productName, Version productVersion,
-        Version coreVersion, Version managementVersion, RunningMode runningMode, ServerState serverState,
-        SuspendState suspendState) {
+    final Set<Container> added;
+    final Set<Container> removed;
+
+    ContainerDiff(final Set<Container> current, final Set<Container> update) {
+        Set<Container> currentCopy = new HashSet<>(current);
+        Set<Container> updateCopy = new HashSet<>(update);
+
+        updateCopy.removeAll(current);
+        added = updateCopy;
+
+        currentCopy.removeAll(update);
+        removed = currentCopy;
+    }
+
+    Set<Container> added() {
+        return added;
+    }
+
+    Set<Container> removed() {
+        return removed;
+    }
 }

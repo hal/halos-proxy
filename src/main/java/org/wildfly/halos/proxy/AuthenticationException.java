@@ -15,13 +15,9 @@
  */
 package org.wildfly.halos.proxy;
 
-import org.wildfly.halos.proxy.dmr.RunningMode;
-import org.wildfly.halos.proxy.dmr.ServerState;
-import org.wildfly.halos.proxy.dmr.SuspendState;
+public class AuthenticationException extends RuntimeException {
 
-import de.skuzzle.semantic.Version;
-
-public record Instance(String containerId, String serverId, String serverName, String productName, Version productVersion,
-        Version coreVersion, Version managementVersion, RunningMode runningMode, ServerState serverState,
-        SuspendState suspendState) {
+    public AuthenticationException(final String message, final Throwable cause) {
+        super(message, cause);
+    }
 }

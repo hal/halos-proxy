@@ -16,161 +16,134 @@
 package org.wildfly.halos.proxy;
 
 import java.io.IOException;
-import java.net.ConnectException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.security.auth.callback.Callback;
-import javax.security.auth.callback.NameCallback;
-import javax.security.auth.callback.PasswordCallback;
-import javax.security.auth.callback.UnsupportedCallbackException;
-import javax.security.sasl.RealmCallback;
 
 import org.jboss.as.controller.client.ModelControllerClient;
-import org.jboss.as.controller.client.Operation;
-import org.jboss.as.controller.client.helpers.ClientConstants;
 import org.jboss.dmr.ModelNode;
 import org.jboss.logging.Logger;
-import org.wildfly.halos.proxy.InstanceModification.Modification;
+import org.wildfly.halos.proxy.dmr.Dispatcher;
+import org.wildfly.halos.proxy.dmr.ModelNodeHelper;
+import org.wildfly.halos.proxy.dmr.Operation;
+import org.wildfly.halos.proxy.dmr.ResourceAddress;
+import org.wildfly.halos.proxy.dmr.RunningMode;
+import org.wildfly.halos.proxy.dmr.ServerState;
+import org.wildfly.halos.proxy.dmr.SuspendState;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.operators.multi.processors.UnicastProcessor;
 
-import static java.util.Collections.synchronizedSortedMap;
+import de.skuzzle.semantic.Version;
 
-/**
- * Manages connections to the WildFly management endpoints and execute DMR operations.
- */
+import static java.util.Collections.synchronizedMap;
+import static org.wildfly.halos.proxy.InstanceModification.Modification.ADDED;
+import static org.wildfly.halos.proxy.InstanceModification.Modification.REMOVED;
+import static org.wildfly.halos.proxy.dmr.ModelDescriptionConstants.ATTRIBUTES_ONLY;
+import static org.wildfly.halos.proxy.dmr.ModelDescriptionConstants.INCLUDE_RUNTIME;
+import static org.wildfly.halos.proxy.dmr.ModelDescriptionConstants.MANAGEMENT_MAJOR_VERSION;
+import static org.wildfly.halos.proxy.dmr.ModelDescriptionConstants.MANAGEMENT_MICRO_VERSION;
+import static org.wildfly.halos.proxy.dmr.ModelDescriptionConstants.MANAGEMENT_MINOR_VERSION;
+import static org.wildfly.halos.proxy.dmr.ModelDescriptionConstants.NAME;
+import static org.wildfly.halos.proxy.dmr.ModelDescriptionConstants.PRODUCT_NAME;
+import static org.wildfly.halos.proxy.dmr.ModelDescriptionConstants.PRODUCT_VERSION;
+import static org.wildfly.halos.proxy.dmr.ModelDescriptionConstants.READ_RESOURCE_OPERATION;
+import static org.wildfly.halos.proxy.dmr.ModelDescriptionConstants.RELEASE_VERSION;
+import static org.wildfly.halos.proxy.dmr.ModelDescriptionConstants.RUNNING_MODE;
+import static org.wildfly.halos.proxy.dmr.ModelDescriptionConstants.SERVER_STATE;
+import static org.wildfly.halos.proxy.dmr.ModelDescriptionConstants.SUSPEND_STATE;
+import static org.wildfly.halos.proxy.dmr.ModelDescriptionConstants.UUID;
+
 @ApplicationScoped
 class Instances {
 
-    private static final String REMOTE_HTTP = "remote+http";
-    private static final Logger log = Logger.getLogger(Instances.class);
-
-    private final SortedMap<Instance, ModelControllerClient> clients;
-    private final UnicastProcessor<InstanceModification> processor;
-    private final Multi<InstanceModification> modifications;
+    static final Logger log = Logger.getLogger(Instances.class);
 
     @Inject
+    Containers containers;
+    final AuthenticationMechanism authenticationMechanism;
+    final Map<Container, ModelControllerClient> clients;
+    final Map<Container, Instance> instances;
+    final UnicastProcessor<InstanceModification> processor;
+    final Multi<InstanceModification> modifications;
+
     Instances() {
-        this.clients = synchronizedSortedMap(new TreeMap<>());
+        this.authenticationMechanism = new UsernamePasswordAuthentication();
+        this.clients = synchronizedMap(new HashMap<>());
+        this.instances = synchronizedMap(new HashMap<>());
         this.processor = UnicastProcessor.create();
         this.modifications = processor.broadcast().toAllSubscribers().onOverflow().dropPreviousItems();
     }
 
-    void register(Instance instance) throws ManagementException {
-        try {
-            InetAddress address = InetAddress.getByName(instance.host);
-            // new ModelControllerClientConfiguration.Builder()
-            // .setSslContext()
-            ModelControllerClient client = ModelControllerClient.Factory.create(REMOTE_HTTP, address, instance.port,
-                    callbacks -> {
-                        for (Callback current : callbacks) {
-                            if (current instanceof NameCallback ncb) {
-                                ncb.setName(instance.username);
-                            } else if (current instanceof PasswordCallback pcb) {
-                                pcb.setPassword(instance.password.toCharArray());
-                            } else if (current instanceof RealmCallback rcb) {
-                                rcb.setText(rcb.getDefaultText());
-                            } else {
-                                throw new UnsupportedCallbackException(current);
-                            }
-                        }
-                    });
-            ModelControllerClient added = clients.put(instance, client);
-            Modification modification = added != null ? Modification.MODIFIED : Modification.ADDED;
-            processor.onNext(new InstanceModification(modification, instance.name));
-            log.infof("Registered client for %s.", instance);
-        } catch (UnknownHostException e) {
-            String error = String.format("Unable to connect to instance %s: %s", instance, e.getMessage());
-            log.error(error);
-            throw new ManagementException(error, e);
-        }
-    }
+    void refresh() {
+        Set<Container> containers = this.containers.query();
+        ContainerDiff diff = new ContainerDiff(clients.keySet(), containers);
 
-    void unregister(String name) throws ManagementException {
-        Map.Entry<Instance, ModelControllerClient> entry = findByName(name);
-        if (entry != null) {
-            Instance instance = entry.getKey();
-            ModelControllerClient client = entry.getValue();
+        log.debugf("Added containers: %s", diff.added());
+        for (Container container : diff.added()) {
             try {
-                client.close();
-                log.infof("Closed client for %s", instance);
-            } catch (IOException e) {
-                String error = String.format("Unable to close client for %s: %s", instance, e.getMessage());
-                log.error(error);
-                throw new ManagementException(error, e);
-            } finally {
-                clients.remove(instance);
-                processor.onNext(new InstanceModification(Modification.REMOVED, instance.name));
+                ModelControllerClient client = authenticationMechanism.authenticate(container);
+                Instance instance = readWildFlyInstance(container, client);
+                clients.put(container, client);
+                instances.put(container, instance);
+                processor.onNext(new InstanceModification(ADDED, instance));
+            } catch (Exception e) {
+                log.errorf("Unable to add new container %s: %s", container, e.getMessage());
             }
         }
-    }
 
-    boolean isEmpty() {
-        return clients.isEmpty();
-    }
-
-    boolean hasInstance(String name) {
-        return findByName(name) != null;
-    }
-
-    public List<Instance> instances() {
-        return List.copyOf(clients.keySet());
-    }
-
-    Multi<InstanceModification> modifications() {
-        return modifications;
-    }
-
-    ModelNode execute(Operation operation) {
-        ModelNode result = new ModelNode();
-        clients.forEach((instance, client) -> executeAndWrap(instance.name, client, operation, instance, result));
-        return result;
-    }
-
-    ModelNode executeSingle(String name, Operation operation) {
-        Map.Entry<Instance, ModelControllerClient> entry = findByName(name);
-        if (entry != null) {
-            ModelNode result = new ModelNode();
-            executeAndWrap(name, entry.getValue(), operation, entry.getKey(), result);
-            return result;
-        } else {
-            log.errorf("Unable to find client for instance %1s. Did you register %1s?", name);
-            return null;
-        }
-    }
-
-    private void executeAndWrap(String name, ModelControllerClient client, Operation operation, Instance instance,
-            ModelNode modelNode) {
-        ModelNode result;
-        try {
-            result = client.execute(operation);
-        } catch (IOException e) {
-            log.errorf("Error executing operation %s against %s: %s", operation.getOperation().toJSONString(true), instance,
-                    e.getMessage());
-            if (e.getCause() instanceof ConnectException) {
-                unregister(name);
+        log.debugf("Removed containers: %s", diff.removed());
+        for (Container container : diff.removed) {
+            ModelControllerClient client = clients.remove(container);
+            if (client != null) {
+                try {
+                    client.close();
+                } catch (IOException e) {
+                    log.errorf("Unable to close client for %s: %s", container, e.getMessage());
+                }
             }
-            result = new ModelNode();
-            result.get(ClientConstants.OUTCOME).set("failed");
-            result.get(ClientConstants.FAILURE_DESCRIPTION).set(e.getMessage());
+            Instance instance = instances.remove(container);
+            processor.onNext(new InstanceModification(REMOVED, instance));
         }
-        modelNode.get(instance.name).set(result);
     }
 
-    private Map.Entry<Instance, ModelControllerClient> findByName(String name) {
-        for (Map.Entry<Instance, ModelControllerClient> entry : clients.entrySet()) {
-            if (name.equals(entry.getKey().name)) {
-                return entry;
-            }
+    private Instance readWildFlyInstance(final Container container, final ModelControllerClient client) {
+        Operation operation = new Operation.Builder(ResourceAddress.root(), READ_RESOURCE_OPERATION)
+                .param(ATTRIBUTES_ONLY, true).param(INCLUDE_RUNTIME, true).build();
+        ModelNode modelNode = new Dispatcher(client).execute(operation);
+
+        String serverId = modelNode.get(UUID).asString();
+        String serverName = modelNode.get(NAME).asString();
+        String productName = modelNode.get(PRODUCT_NAME).asString();
+        Version productVersion = Version.parseVersion(makeSemantic(modelNode.get(PRODUCT_VERSION).asString()));
+        Version coreVersion = Version.parseVersion(makeSemantic(modelNode.get(RELEASE_VERSION).asString()));
+        Version managementVersion = parseManagementVersion(modelNode);
+        RunningMode runningMode = ModelNodeHelper.asEnumValue(modelNode, RUNNING_MODE, RunningMode::valueOf,
+                RunningMode.UNDEFINED);
+        ServerState serverState = ModelNodeHelper.asEnumValue(modelNode, SERVER_STATE, ServerState::valueOf,
+                ServerState.UNDEFINED);
+        SuspendState suspendState = ModelNodeHelper.asEnumValue(modelNode, SUSPEND_STATE, SuspendState::valueOf,
+                SuspendState.UNDEFINED);
+
+        return new Instance(container.id(), serverId, serverName, productName, productVersion, coreVersion, managementVersion,
+                runningMode, serverState, suspendState);
+    }
+
+    private String makeSemantic(String version) {
+        return version.replace(".Final", "-Final");
+    }
+
+    public static Version parseManagementVersion(ModelNode modelNode) {
+        if (modelNode.hasDefined(MANAGEMENT_MAJOR_VERSION) && modelNode.hasDefined(MANAGEMENT_MINOR_VERSION)
+                && modelNode.hasDefined(MANAGEMENT_MICRO_VERSION)) {
+            int major = modelNode.get(MANAGEMENT_MAJOR_VERSION).asInt();
+            int minor = modelNode.get(MANAGEMENT_MINOR_VERSION).asInt();
+            int patch = modelNode.get(MANAGEMENT_MICRO_VERSION).asInt();
+            return Version.create(major, minor, patch);
         }
-        return null;
+        return Version.ZERO;
     }
 }

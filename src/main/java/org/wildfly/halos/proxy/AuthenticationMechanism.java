@@ -15,13 +15,9 @@
  */
 package org.wildfly.halos.proxy;
 
-import org.wildfly.halos.proxy.dmr.RunningMode;
-import org.wildfly.halos.proxy.dmr.ServerState;
-import org.wildfly.halos.proxy.dmr.SuspendState;
+import org.jboss.as.controller.client.ModelControllerClient;
 
-import de.skuzzle.semantic.Version;
+public interface AuthenticationMechanism {
 
-public record Instance(String containerId, String serverId, String serverName, String productName, Version productVersion,
-        Version coreVersion, Version managementVersion, RunningMode runningMode, ServerState serverState,
-        SuspendState suspendState) {
+    ModelControllerClient authenticate(Container container) throws AuthenticationException;
 }
