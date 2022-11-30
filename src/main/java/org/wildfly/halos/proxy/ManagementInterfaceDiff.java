@@ -18,14 +18,14 @@ package org.wildfly.halos.proxy;
 import java.util.HashSet;
 import java.util.Set;
 
-class ContainerDiff {
+class ManagementInterfaceDiff {
 
-    private final Set<Container> added;
-    private final Set<Container> removed;
+    private final Set<ManagementInterface> added;
+    private final Set<ManagementInterface> removed;
 
-    ContainerDiff(final Set<Container> current, final Set<Container> update) {
-        Set<Container> currentCopy = new HashSet<>(current);
-        Set<Container> updateCopy = new HashSet<>(update);
+    ManagementInterfaceDiff(final Set<ManagementInterface> current, final Set<ManagementInterface> update) {
+        Set<ManagementInterface> currentCopy = new HashSet<>(current);
+        Set<ManagementInterface> updateCopy = new HashSet<>(update);
 
         updateCopy.removeAll(current);
         added = updateCopy;
@@ -34,11 +34,11 @@ class ContainerDiff {
         removed = currentCopy;
     }
 
-    Set<Container> added() {
+    Set<ManagementInterface> added() {
         return added;
     }
 
-    Set<Container> removed() {
+    Set<ManagementInterface> removed() {
         return removed;
     }
 }

@@ -17,6 +17,10 @@ package org.wildfly.halos.proxy.dmr;
 
 public class DispatchException extends RuntimeException {
 
+    public DispatchException(final String message) {
+        super(message);
+    }
+
     public DispatchException(final String message, final Throwable cause) {
         super(message, cause);
     }

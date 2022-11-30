@@ -26,18 +26,22 @@ public interface ModelDescriptionConstants {
     // KEEP THESE IN ALPHABETICAL ORDER!
     String ADDRESS = "address";
     String ATTRIBUTES_ONLY = "attributes-only";
+    String FAILURE_DESCRIPTION = "failure-description";
     String INCLUDE_RUNTIME = "include-runtime";
     String MANAGEMENT_MAJOR_VERSION = "management-major-version";
     String MANAGEMENT_MICRO_VERSION = "management-micro-version";
     String MANAGEMENT_MINOR_VERSION = "management-minor-version";
     String NAME = "name";
     String OP = "operation";
+    String OUTCOME = "outcome";
     String PRODUCT_NAME = "product-name";
     String PRODUCT_VERSION = "product-version";
     String READ_RESOURCE_OPERATION = "read-resource";
+    String RESULT = "result";
     String RELEASE_VERSION = "release-version";
     String RUNNING_MODE = "running-mode";
     String SERVER_STATE = "server-state";
+    String SUCCESS = "success";
     String SUSPEND_STATE = "suspend-state";
     String UUID = "uuid";
 }

@@ -85,7 +85,6 @@
 <!--        <version.quarkus.quinoa>1.2.3</version.quarkus.quinoa>-->
         <version.quarkus>2.14.2.Final</version.quarkus>
         <version.semantic.version>2.1.1</version.semantic.version>
-        <version.testcontainers>1.17.5</version.testcontainers>
         <version.wildfly.quarkus>0.0.1.Final</version.wildfly.quarkus>
 
         <!-- Plugin versions -->

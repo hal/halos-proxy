@@ -15,11 +15,11 @@
  */
 package org.wildfly.halos.proxy.dmr;
 
-import static org.jboss.as.controller.client.helpers.ClientConstants.ADD;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import org.jboss.dmr.ModelNode;
 import org.junit.jupiter.api.Test;
+
+import static org.jboss.as.controller.client.helpers.ClientConstants.ADD;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class OperationTest {
 

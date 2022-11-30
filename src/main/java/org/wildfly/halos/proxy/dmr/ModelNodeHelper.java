@@ -15,9 +15,6 @@
  */
 package org.wildfly.halos.proxy.dmr;
 
-import static com.google.common.base.CaseFormat.LOWER_HYPHEN;
-import static com.google.common.base.CaseFormat.UPPER_UNDERSCORE;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
@@ -30,6 +27,12 @@ import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 
+import static com.google.common.base.CaseFormat.LOWER_HYPHEN;
+import static com.google.common.base.CaseFormat.UPPER_UNDERSCORE;
+import static org.wildfly.halos.proxy.dmr.ModelDescriptionConstants.FAILURE_DESCRIPTION;
+import static org.wildfly.halos.proxy.dmr.ModelDescriptionConstants.OUTCOME;
+import static org.wildfly.halos.proxy.dmr.ModelDescriptionConstants.SUCCESS;
+
 /**
  * Static helper methods for dealing with {@link ModelNode}s. Some methods accept a path parameter * separated by "." to get a
  * deeply nested data.
@@ -37,6 +40,20 @@ import com.google.common.collect.Iterables;
 public final class ModelNodeHelper {
 
     private static final char PATH_SEPARATOR = '.';
+
+    /** @return {@code true} if the model node has an outcome and the outcome does not equal "success" */
+    public static boolean isFailure(ModelNode modelNode) {
+        return modelNode.hasDefined(OUTCOME) && !modelNode.get(OUTCOME).asString().equals(SUCCESS);
+    }
+
+    /** @return the failure description or "No failure-description provided" */
+    public static String getFailureDescription(ModelNode modelNode) {
+        if (modelNode.hasDefined(FAILURE_DESCRIPTION)) {
+            return modelNode.get(FAILURE_DESCRIPTION).asString();
+        } else {
+            return "No failure-description provided";
+        }
+    }
 
     /**
      * Tries to get a deeply nested model node from the specified model node. Nested paths must be separated with ".".

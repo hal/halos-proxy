@@ -15,6 +15,35 @@
  */
 package org.wildfly.halos.proxy;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.security.auth.callback.Callback;
+import javax.security.auth.callback.NameCallback;
+import javax.security.auth.callback.PasswordCallback;
+import javax.security.auth.callback.UnsupportedCallbackException;
+import javax.security.sasl.RealmCallback;
+
+import org.jboss.as.controller.client.ModelControllerClient;
+import org.jboss.dmr.ModelNode;
+import org.wildfly.halos.proxy.dmr.Dispatcher;
+import org.wildfly.halos.proxy.dmr.ModelNodeHelper;
+import org.wildfly.halos.proxy.dmr.Operation;
+import org.wildfly.halos.proxy.dmr.ResourceAddress;
+import org.wildfly.halos.proxy.dmr.RunningMode;
+import org.wildfly.halos.proxy.dmr.ServerState;
+import org.wildfly.halos.proxy.dmr.SuspendState;
+
+import io.quarkus.logging.Log;
+import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.operators.multi.processors.UnicastProcessor;
+
+import de.skuzzle.semantic.Version;
+
 import static java.util.Collections.synchronizedMap;
 import static org.wildfly.halos.proxy.InstanceModification.Modification.ADDED;
 import static org.wildfly.halos.proxy.InstanceModification.Modification.REMOVED;
@@ -33,48 +62,16 @@ import static org.wildfly.halos.proxy.dmr.ModelDescriptionConstants.SERVER_STATE
 import static org.wildfly.halos.proxy.dmr.ModelDescriptionConstants.SUSPEND_STATE;
 import static org.wildfly.halos.proxy.dmr.ModelDescriptionConstants.UUID;
 
-import java.io.IOException;
-import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-
-import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.jboss.as.controller.client.ModelControllerClient;
-import org.jboss.as.controller.client.ModelControllerClientConfiguration;
-import org.jboss.dmr.ModelNode;
-import org.jboss.logging.Logger;
-import org.wildfly.halos.proxy.dmr.Dispatcher;
-import org.wildfly.halos.proxy.dmr.ModelNodeHelper;
-import org.wildfly.halos.proxy.dmr.Operation;
-import org.wildfly.halos.proxy.dmr.ResourceAddress;
-import org.wildfly.halos.proxy.dmr.RunningMode;
-import org.wildfly.halos.proxy.dmr.ServerState;
-import org.wildfly.halos.proxy.dmr.SuspendState;
-
-import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.operators.multi.processors.UnicastProcessor;
-
-import de.skuzzle.semantic.Version;
-
 @ApplicationScoped
 class InstanceRepository {
 
-    private static final int DEFAULT_TIMEOUT = 10; // seconds
-    private static final Logger log = Logger.getLogger(InstanceRepository.class);
+    private static final String REMOTE_HTTP = "remote+http";
 
     @Inject
-    ContainerRepository containerRepository;
+    ManagementInterfaceRepository managementInterfaceRepository;
 
-    @ConfigProperty(name = "halos.mcc.timeout")
-    Optional<Integer> timeout;
-
-    private final Map<Container, ModelControllerClient> clients;
-    private final Map<Container, Instance> instances;
+    private final Map<ManagementInterface, ModelControllerClient> clients;
+    private final Map<ManagementInterface, Instance> instances;
     private final UnicastProcessor<InstanceModification> processor;
     private final Multi<InstanceModification> modifications;
 
@@ -86,45 +83,55 @@ class InstanceRepository {
     }
 
     void lookup() {
-        Set<Container> containers = containerRepository.lookup();
-        ContainerDiff diff = new ContainerDiff(clients.keySet(), containers);
+        Set<ManagementInterface> managementInterfaces = managementInterfaceRepository.lookup();
+        ManagementInterfaceDiff diff = new ManagementInterfaceDiff(clients.keySet(), managementInterfaces);
 
-        log.debugf("Added containers: %s", diff.added());
-        for (Container container : diff.added()) {
+        Log.debugf("Added management interfaces: %s", diff.added());
+        for (ManagementInterface managementInterface : diff.added()) {
             try {
-                ModelControllerClient client = modelControllerClient(container);
-                Instance instance = readWildFlyInstance(client, container);
-                clients.put(container, client);
-                instances.put(container, instance);
+                ModelControllerClient client = modelControllerClient(managementInterface);
+                Instance instance = readWildFlyInstance(client, managementInterface);
+                clients.put(managementInterface, client);
+                instances.put(managementInterface, instance);
                 processor.onNext(new InstanceModification(ADDED, instance));
             } catch (Exception e) {
-                log.errorf("Unable to add new container %s: %s", container, e.getMessage());
+                Log.errorf("Unable to add new management interface %s: %s", managementInterface, e.getMessage());
             }
         }
 
-        log.debugf("Removed containers: %s", diff.removed());
-        for (Container container : diff.removed()) {
-            ModelControllerClient client = clients.remove(container);
+        Log.debugf("Removed management interfaces: %s", diff.removed());
+        for (ManagementInterface managementInterface : diff.removed()) {
+            ModelControllerClient client = clients.remove(managementInterface);
             if (client != null) {
                 try {
                     client.close();
                 } catch (IOException e) {
-                    log.errorf("Unable to close client for %s: %s", container, e.getMessage());
+                    Log.errorf("Unable to close client for management interface %s: %s", managementInterface, e.getMessage());
                 }
             }
-            Instance instance = instances.remove(container);
+            Instance instance = instances.remove(managementInterface);
             processor.onNext(new InstanceModification(REMOVED, instance));
         }
     }
 
-    private ModelControllerClient modelControllerClient(final Container container) {
-        ModelControllerClientConfiguration configuration = new ModelControllerClientConfiguration.Builder()
-                .setProtocol("remote+http").setHostName(container.ip()).setPort(container.port())
-                .setConnectionTimeout(((int) Duration.ofSeconds(timeout.orElse(DEFAULT_TIMEOUT)).toMillis())).build();
-        return ModelControllerClient.Factory.create(configuration);
+    private ModelControllerClient modelControllerClient(final ManagementInterface managementInterface) {
+        return ModelControllerClient.Factory.create(REMOTE_HTTP, managementInterface.hostname(), managementInterface.port(),
+                callbacks -> {
+                    for (Callback current : callbacks) {
+                        if (current instanceof NameCallback ncb) {
+                            ncb.setName("admin");
+                        } else if (current instanceof PasswordCallback pcb) {
+                            pcb.setPassword("admin".toCharArray());
+                        } else if (current instanceof RealmCallback rcb) {
+                            rcb.setText(rcb.getDefaultText());
+                        } else {
+                            throw new UnsupportedCallbackException(current);
+                        }
+                    }
+                });
     }
 
-    private Instance readWildFlyInstance(final ModelControllerClient client, final Container container) {
+    private Instance readWildFlyInstance(final ModelControllerClient client, final ManagementInterface managementInterface) {
         Operation operation = new Operation.Builder(ResourceAddress.root(), READ_RESOURCE_OPERATION)
                 .param(ATTRIBUTES_ONLY, true).param(INCLUDE_RUNTIME, true).build();
         ModelNode modelNode = new Dispatcher(client).execute(operation);
@@ -142,8 +149,8 @@ class InstanceRepository {
         SuspendState suspendState = ModelNodeHelper.asEnumValue(modelNode, SUSPEND_STATE, SuspendState::valueOf,
                 SuspendState.UNDEFINED);
 
-        return new Instance(container.id(), serverId, serverName, productName, productVersion, coreVersion, managementVersion,
-                runningMode, serverState, suspendState);
+        return new Instance(managementInterface.id(), serverId, serverName, productName, productVersion, coreVersion,
+                managementVersion, runningMode, serverState, suspendState);
     }
 
     private String makeSemantic(final String version) {
@@ -161,7 +168,12 @@ class InstanceRepository {
         return Version.ZERO;
     }
 
-    public Multi<InstanceModification> getModifications() {
+    ModelControllerClient getClient(final String id) {
+        return clients.entrySet().stream().filter(entry -> id.equals(entry.getKey().id())).map(Map.Entry::getValue).findAny()
+                .orElse(null);
+    }
+
+    Multi<InstanceModification> getModifications() {
         return modifications;
     }
 }

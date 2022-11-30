@@ -35,6 +35,5 @@ pom.xml.versionsBackup
 release.properties
 
 # Misc
-xmlns/
 lsp
 .cache

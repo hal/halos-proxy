@@ -20,6 +20,8 @@ import java.io.IOException;
 import org.jboss.as.controller.client.ModelControllerClient;
 import org.jboss.dmr.ModelNode;
 
+import static org.wildfly.halos.proxy.dmr.ModelDescriptionConstants.RESULT;
+
 public class Dispatcher {
 
     private final ModelControllerClient client;
@@ -28,9 +30,19 @@ public class Dispatcher {
         this.client = client;
     }
 
+    /**
+     * Executes the operation and returns the {@linkplain ModelDescriptionConstants#RESULT} node of the payload. Throws an
+     * exception if the operation failed (operation error) or if the model controller client throws an exception (technical
+     * error)
+     */
     public ModelNode execute(final Operation operation) throws DispatchException {
         try {
-            return client.execute(operation);
+            ModelNode payload = client.execute(operation);
+            if (ModelNodeHelper.isFailure(payload)) {
+                throw new DispatchException(String.format("Operation %s failed: %s", operation.asCli(),
+                        ModelNodeHelper.getFailureDescription(payload)));
+            }
+            return payload.get(RESULT);
         } catch (IOException e) {
             throw new DispatchException(String.format("Error executing operation %s: %s", operation.asCli(), e.getMessage()),
                     e);
