@@ -34,7 +34,7 @@ import static com.google.common.base.CaseFormat.UPPER_UNDERSCORE;
  * Static helper methods for dealing with {@link ModelNode}s. Some methods accept a path parameter * separated by "." to get a
  * deeply nested data.
  */
-public class ModelNodeHelper {
+public final class ModelNodeHelper {
 
     private static final char PATH_SEPARATOR = '.';
 
@@ -43,10 +43,9 @@ public class ModelNodeHelper {
      *
      * @param modelNode The model node to read from
      * @param path A path separated with "."
-     *
      * @return The nested node or an empty / undefined model node
      */
-    public static ModelNode failSafeGet(ModelNode modelNode, String path) {
+    public static ModelNode failSafeGet(final ModelNode modelNode, final String path) {
         ModelNode undefined = new ModelNode();
 
         if (Strings.emptyToNull(path) != null) {
@@ -73,25 +72,25 @@ public class ModelNodeHelper {
      *
      * @param modelNode The model node to read from
      * @param path A path separated with "."
-     *
      * @return the boolean value or false.
      */
-    public static boolean failSafeBoolean(ModelNode modelNode, String path) {
+    public static boolean failSafeBoolean(final ModelNode modelNode, final String path) {
         ModelNode attribute = failSafeGet(modelNode, path);
         return attribute.isDefined() && attribute.asBoolean();
     }
 
-    public static List<ModelNode> failSafeList(ModelNode modelNode, String path) {
+    public static List<ModelNode> failSafeList(final ModelNode modelNode, final String path) {
         ModelNode result = failSafeGet(modelNode, path);
         return result.isDefined() ? result.asList() : Collections.emptyList();
     }
 
-    public static List<Property> failSafePropertyList(ModelNode modelNode, String path) {
+    public static List<Property> failSafePropertyList(final ModelNode modelNode, final String path) {
         ModelNode result = failSafeGet(modelNode, path);
         return result.isDefined() ? result.asPropertyList() : Collections.emptyList();
     }
 
-    public static <T> T getOrDefault(ModelNode modelNode, String attribute, Supplier<T> supplier, T defaultValue) {
+    public static <T> T getOrDefault(final ModelNode modelNode, final String attribute, final Supplier<T> supplier,
+            final T defaultValue) {
         T result = defaultValue;
         if (modelNode != null && modelNode.hasDefined(attribute)) {
             try {
@@ -107,15 +106,16 @@ public class ModelNodeHelper {
      * Looks for the specified attribute and tries to convert it to an enum constant using
      * {@code LOWER_HYPHEN.to(UPPER_UNDERSCORE, modelNode.get(attribute).asString())}.
      */
-    public static <E extends Enum<E>> E asEnumValue(ModelNode modelNode, String attribute, Function<String, E> valueOf,
-            E defaultValue) {
+    public static <E extends Enum<E>> E asEnumValue(final ModelNode modelNode, final String attribute,
+            final Function<String, E> valueOf, final E defaultValue) {
         if (modelNode.hasDefined(attribute)) {
             return asEnumValue(modelNode.get(attribute), valueOf, defaultValue);
         }
         return defaultValue;
     }
 
-    public static <E extends Enum<E>> E asEnumValue(ModelNode modelNodeValue, Function<String, E> valueOf, E defaultValue) {
+    public static <E extends Enum<E>> E asEnumValue(final ModelNode modelNodeValue, final Function<String, E> valueOf,
+            final E defaultValue) {
         E value = defaultValue;
         String convertedValue = LOWER_HYPHEN.to(UPPER_UNDERSCORE, modelNodeValue.asString());
         try {

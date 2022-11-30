@@ -21,6 +21,9 @@ import org.wildfly.halos.proxy.dmr.SuspendState;
 
 import de.skuzzle.semantic.Version;
 
+/**
+ * A WildFly instance with a valid connection to the management interface.
+ */
 public record Instance(String containerId, String serverId, String serverName, String productName, Version productVersion,
         Version coreVersion, Version managementVersion, RunningMode runningMode, ServerState serverState,
         SuspendState suspendState) {

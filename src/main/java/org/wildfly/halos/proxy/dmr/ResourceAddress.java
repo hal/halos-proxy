@@ -33,7 +33,7 @@ public class ResourceAddress extends ModelNode {
     }
 
     /** Creates a new resource address from the specified string. */
-    public static ResourceAddress from(String address) {
+    public static ResourceAddress from(final String address) {
         if (address == null) {
             throw new IllegalArgumentException("Address must not be null");
         }
@@ -74,7 +74,7 @@ public class ResourceAddress extends ModelNode {
         setEmptyList();
     }
 
-    public ResourceAddress(ModelNode address) {
+    public ResourceAddress(final ModelNode address) {
         set(address);
     }
 
@@ -86,7 +86,7 @@ public class ResourceAddress extends ModelNode {
      *
      * @return this address with the specified segment added
      */
-    public ResourceAddress add(String propertyName, String propertyValue) {
+    public ResourceAddress add(final String propertyName, final String propertyValue) {
         add().set(propertyName, propertyValue);
         return this;
     }
@@ -98,7 +98,7 @@ public class ResourceAddress extends ModelNode {
      *
      * @return this address with the specified address added
      */
-    public ResourceAddress add(ResourceAddress address) {
+    public ResourceAddress add(final ResourceAddress address) {
         if (address != null) {
             for (Property property : address.asPropertyList()) {
                 add(property.getName(), property.getValue().asString());

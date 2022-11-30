@@ -24,11 +24,11 @@ public class Dispatcher {
 
     private final ModelControllerClient client;
 
-    public Dispatcher(ModelControllerClient client) {
+    public Dispatcher(final ModelControllerClient client) {
         this.client = client;
     }
 
-    public ModelNode execute(Operation operation) throws DispatchException {
+    public ModelNode execute(final Operation operation) throws DispatchException {
         try {
             return client.execute(operation);
         } catch (IOException e) {

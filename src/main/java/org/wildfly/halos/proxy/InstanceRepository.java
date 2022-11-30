@@ -16,6 +16,7 @@
 package org.wildfly.halos.proxy;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -24,6 +25,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.jboss.as.controller.client.ModelControllerClient;
+import org.jboss.as.controller.client.ModelControllerClientConfiguration;
 import org.jboss.dmr.ModelNode;
 import org.jboss.logging.Logger;
 import org.wildfly.halos.proxy.dmr.Dispatcher;
@@ -58,35 +60,34 @@ import static org.wildfly.halos.proxy.dmr.ModelDescriptionConstants.SUSPEND_STAT
 import static org.wildfly.halos.proxy.dmr.ModelDescriptionConstants.UUID;
 
 @ApplicationScoped
-class Instances {
+class InstanceRepository {
 
-    static final Logger log = Logger.getLogger(Instances.class);
+    private static final Logger log = Logger.getLogger(InstanceRepository.class);
 
     @Inject
-    Containers containers;
-    final AuthenticationMechanism authenticationMechanism;
-    final Map<Container, ModelControllerClient> clients;
-    final Map<Container, Instance> instances;
-    final UnicastProcessor<InstanceModification> processor;
-    final Multi<InstanceModification> modifications;
+    ContainerRepository containers;
 
-    Instances() {
-        this.authenticationMechanism = new UsernamePasswordAuthentication();
+    private final Map<Container, ModelControllerClient> clients;
+    private final Map<Container, Instance> instances;
+    private final UnicastProcessor<InstanceModification> processor;
+    private final Multi<InstanceModification> modifications;
+
+    InstanceRepository() {
         this.clients = synchronizedMap(new HashMap<>());
         this.instances = synchronizedMap(new HashMap<>());
         this.processor = UnicastProcessor.create();
         this.modifications = processor.broadcast().toAllSubscribers().onOverflow().dropPreviousItems();
     }
 
-    void refresh() {
-        Set<Container> containers = this.containers.query();
+    void lookup() {
+        Set<Container> containers = this.containers.lookup();
         ContainerDiff diff = new ContainerDiff(clients.keySet(), containers);
 
         log.debugf("Added containers: %s", diff.added());
         for (Container container : diff.added()) {
             try {
-                ModelControllerClient client = authenticationMechanism.authenticate(container);
-                Instance instance = readWildFlyInstance(container, client);
+                ModelControllerClient client = modelControllerClient(container);
+                Instance instance = readWildFlyInstance(client, container);
                 clients.put(container, client);
                 instances.put(container, instance);
                 processor.onNext(new InstanceModification(ADDED, instance));
@@ -96,7 +97,7 @@ class Instances {
         }
 
         log.debugf("Removed containers: %s", diff.removed());
-        for (Container container : diff.removed) {
+        for (Container container : diff.removed()) {
             ModelControllerClient client = clients.remove(container);
             if (client != null) {
                 try {
@@ -110,7 +111,14 @@ class Instances {
         }
     }
 
-    private Instance readWildFlyInstance(final Container container, final ModelControllerClient client) {
+    private ModelControllerClient modelControllerClient(final Container container) {
+        ModelControllerClientConfiguration configuration = new ModelControllerClientConfiguration.Builder()
+                .setProtocol("remote+http").setHostName(container.ip()).setPort(container.port())
+                .setConnectionTimeout(((int) Duration.ofSeconds(5).toMillis())).build();
+        return ModelControllerClient.Factory.create(configuration);
+    }
+
+    private Instance readWildFlyInstance(final ModelControllerClient client, final Container container) {
         Operation operation = new Operation.Builder(ResourceAddress.root(), READ_RESOURCE_OPERATION)
                 .param(ATTRIBUTES_ONLY, true).param(INCLUDE_RUNTIME, true).build();
         ModelNode modelNode = new Dispatcher(client).execute(operation);
@@ -132,11 +140,11 @@ class Instances {
                 runningMode, serverState, suspendState);
     }
 
-    private String makeSemantic(String version) {
+    private String makeSemantic(final String version) {
         return version.replace(".Final", "-Final");
     }
 
-    public static Version parseManagementVersion(ModelNode modelNode) {
+    private Version parseManagementVersion(final ModelNode modelNode) {
         if (modelNode.hasDefined(MANAGEMENT_MAJOR_VERSION) && modelNode.hasDefined(MANAGEMENT_MINOR_VERSION)
                 && modelNode.hasDefined(MANAGEMENT_MICRO_VERSION)) {
             int major = modelNode.get(MANAGEMENT_MAJOR_VERSION).asInt();
@@ -145,5 +153,9 @@ class Instances {
             return Version.create(major, minor, patch);
         }
         return Version.ZERO;
+    }
+
+    public Multi<InstanceModification> getModifications() {
+        return modifications;
     }
 }

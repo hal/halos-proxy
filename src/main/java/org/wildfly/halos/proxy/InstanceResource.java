@@ -30,13 +30,13 @@ import io.smallrye.mutiny.Multi;
 public class InstanceResource {
 
     @Inject
-    Instances instances;
+    InstanceRepository instanceRepository;
 
     @GET
     @Path("/subscribe")
     @Produces(MediaType.SERVER_SENT_EVENTS)
     @RestStreamElementType(MediaType.APPLICATION_JSON)
     public Multi<InstanceModification> modifications() {
-        return instances.modifications;
+        return instanceRepository.getModifications();
     }
 }

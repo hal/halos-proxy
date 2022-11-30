@@ -32,10 +32,10 @@ public class Operation extends ModelNode {
     private final ResourceAddress address;
     private final ModelNode parameter;
 
-    Operation(String name, ResourceAddress address, ModelNode parameter) {
-        this.name = name;
-        this.address = address;
-        this.parameter = parameter == null ? new ModelNode() : parameter;
+    private Operation(final Builder builder) {
+        this.name = builder.name;
+        this.address = builder.address;
+        this.parameter = builder.parameter == null ? new ModelNode() : builder.parameter;
 
         set(this.parameter.clone());
         get(OP).set(name);
@@ -107,45 +107,45 @@ public class Operation extends ModelNode {
         private final ResourceAddress address;
         private final ModelNode parameter;
 
-        public Builder(ResourceAddress address, String name) {
+        public Builder(final ResourceAddress address, final String name) {
             this.address = address;
             this.name = name;
             this.parameter = new ModelNode();
         }
 
-        public Builder param(String name, boolean value) {
+        public Builder param(final String name, final boolean value) {
             parameter.get(name).set(value);
             return this;
         }
 
-        public Builder param(String name, int value) {
+        public Builder param(final String name, final int value) {
             parameter.get(name).set(value);
             return this;
         }
 
-        public Builder param(String name, long value) {
+        public Builder param(final String name, final long value) {
             parameter.get(name).set(value);
             return this;
         }
 
-        public Builder param(String name, double value) {
+        public Builder param(final String name, final double value) {
             parameter.get(name).set(value);
             return this;
         }
 
-        public Builder param(String name, String value) {
+        public Builder param(final String name, final String value) {
             parameter.get(name).set(value);
             return this;
         }
 
-        public Builder param(String name, String[] values) {
+        public Builder param(final String name, final String[] values) {
             for (String value : values) {
                 parameter.get(name).add(value);
             }
             return this;
         }
 
-        public Builder param(String name, ModelNode value) {
+        public Builder param(final String name, final ModelNode value) {
             parameter.get(name).set(value);
             return this;
         }
@@ -154,7 +154,7 @@ public class Operation extends ModelNode {
          * @return builds and returns the operation
          */
         public Operation build() {
-            return new Operation(name, address, parameter);
+            return new Operation(this);
         }
     }
 }

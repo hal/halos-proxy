@@ -36,13 +36,14 @@ public class ModelNodeMessageBodyWriter implements MessageBodyWriter<ModelNode> 
     public static final String DMR_ENCODED = "application/dmr-encoded";
 
     @Override
-    public boolean isWriteable(Class<?> aClass, Type type, Annotation[] annotations, MediaType mediaType) {
+    public boolean isWriteable(final Class<?> aClass, final Type type, final Annotation[] annotations,
+            final MediaType mediaType) {
         return type == ModelNode.class;
     }
 
     @Override
-    public void writeTo(ModelNode modelNode, Class<?> aClass, Type type, Annotation[] annotations, MediaType mediaType,
-            MultivaluedMap<String, Object> multivaluedMap, OutputStream outputStream)
+    public void writeTo(final ModelNode modelNode, final Class<?> aClass, final Type type, final Annotation[] annotations,
+            final MediaType mediaType, final MultivaluedMap<String, Object> multivaluedMap, final OutputStream outputStream)
             throws IOException, WebApplicationException {
         modelNode.writeBase64(outputStream);
     }

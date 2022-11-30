@@ -33,7 +33,7 @@ import static org.wildfly.halos.proxy.dmr.ModelNodeMessageBodyWriter.DMR_ENCODED
 public class ManagementResource {
 
     @POST
-    public Response execute(InputStream inputStream) {
+    public Response execute(final InputStream inputStream) {
         return Response.status(Status.NOT_FOUND).entity("No instances registered.").build();
         // if (instances.isEmpty()) {
         // return Response.status(Status.NOT_FOUND).entity("No instances registered.").build();
@@ -51,7 +51,7 @@ public class ManagementResource {
 
     @POST
     @Path("/{name}")
-    public Response executeSingle(@PathParam("name") String name, InputStream inputStream) {
+    public Response executeSingle(@PathParam("name") final String name, final InputStream inputStream) {
         return Response.status(Status.NOT_FOUND).entity("Instance " + name + " not found.").build();
         // if (instances.hasInstance(name)) {
         // try {

@@ -15,6 +15,9 @@
  */
 package org.wildfly.halos.proxy;
 
+/**
+ * An added or removed WildFly instance.
+ */
 public record InstanceModification(Modification modification, Instance instance) {
 
     public enum Modification {

@@ -20,8 +20,8 @@ import java.util.Set;
 
 class ContainerDiff {
 
-    final Set<Container> added;
-    final Set<Container> removed;
+    private final Set<Container> added;
+    private final Set<Container> removed;
 
     ContainerDiff(final Set<Container> current, final Set<Container> update) {
         Set<Container> currentCopy = new HashSet<>(current);

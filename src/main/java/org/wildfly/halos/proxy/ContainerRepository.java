@@ -33,10 +33,10 @@ import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.openshift.client.OpenShiftClient;
 
 @ApplicationScoped
-class Containers {
+class ContainerRepository {
 
-    static final String POD_LABELS = "halos.pod.labels.";
-    static final Logger log = Logger.getLogger(Containers.class);
+    private static final String POD_LABELS = "halos.pod.labels.";
+    private static final Logger log = Logger.getLogger(ContainerRepository.class);
 
     @Inject
     Config config;
@@ -45,7 +45,7 @@ class Containers {
 
     private final Map<String, String> labels;
 
-    Containers() {
+    ContainerRepository() {
         // injecting directly as a Map<String,String>
         // does not work when the labels contain "."
         labels = new HashMap<>();
@@ -58,7 +58,7 @@ class Containers {
         }
     }
 
-    Set<Container> query() throws DiscoveryException {
+    Set<Container> lookup() {
         Set<Container> containers = new HashSet<>();
         log.debugf("Lookup pods using labels %s", labels);
 
@@ -78,9 +78,7 @@ class Containers {
                 }
             }
         } catch (KubernetesClientException e) {
-            String error = String.format("Unable to read pods: %s", e.getMessage());
-            log.error(error);
-            throw new DiscoveryException(error, e);
+            log.errorf("Unable to read pods: %s", e.getMessage());
         }
         return containers;
     }

@@ -15,9 +15,19 @@
  */
 package org.wildfly.halos.proxy;
 
-import org.jboss.as.controller.client.ModelControllerClient;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
-public interface AuthenticationMechanism {
+import io.quarkus.scheduler.Scheduled;
 
-    ModelControllerClient authenticate(Container container) throws AuthenticationException;
+@ApplicationScoped
+class InstanceService {
+
+    @Inject
+    InstanceRepository instanceRepository;
+
+    @Scheduled(every = "2s")
+    void refresh() {
+        instanceRepository.lookup();
+    }
 }

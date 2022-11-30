@@ -15,5 +15,8 @@
  */
 package org.wildfly.halos.proxy;
 
+/**
+ * A WildFly container
+ */
 public record Container(String id, String ip, int port) {
 }
