@@ -15,16 +15,16 @@
  */
 package org.wildfly.halos.proxy.dmr;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import org.jboss.dmr.Property;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ResourceAddressTest {
 
@@ -69,7 +69,7 @@ public class ResourceAddressTest {
         assertArrayEquals(new String[] { "subsystem", "ee", "context-service", "default" }, segments(address));
     }
 
-    private String[] segments(ResourceAddress address) {
+    private String[] segments(final ResourceAddress address) {
         List<String> segments = new ArrayList<>();
         for (Property property : address.asPropertyList()) {
             segments.add(property.getName());

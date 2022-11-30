@@ -15,13 +15,13 @@
  */
 package org.wildfly.halos.proxy.dmr;
 
+import static org.wildfly.halos.proxy.dmr.ModelDescriptionConstants.ADDRESS;
+import static org.wildfly.halos.proxy.dmr.ModelDescriptionConstants.OP;
+
 import java.util.Iterator;
 
 import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.Property;
-
-import static org.wildfly.halos.proxy.dmr.ModelDescriptionConstants.ADDRESS;
-import static org.wildfly.halos.proxy.dmr.ModelDescriptionConstants.OP;
 
 /**
  * Represents a DMR operation.

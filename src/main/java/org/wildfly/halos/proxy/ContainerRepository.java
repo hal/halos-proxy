@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
@@ -46,9 +47,13 @@ class ContainerRepository {
     private final Map<String, String> labels;
 
     ContainerRepository() {
+        labels = new HashMap<>();
+    }
+
+    @PostConstruct
+    void initLabels() {
         // injecting directly as a Map<String,String>
         // does not work when the labels contain "."
-        labels = new HashMap<>();
         for (String property : config.getPropertyNames()) {
             if (property.startsWith(POD_LABELS)) {
                 String label = property.substring(POD_LABELS.length()).replaceAll("^\"|\"$", "");

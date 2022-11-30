@@ -15,32 +15,6 @@
  */
 package org.wildfly.halos.proxy;
 
-import java.io.IOException;
-import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-
-import org.jboss.as.controller.client.ModelControllerClient;
-import org.jboss.as.controller.client.ModelControllerClientConfiguration;
-import org.jboss.dmr.ModelNode;
-import org.jboss.logging.Logger;
-import org.wildfly.halos.proxy.dmr.Dispatcher;
-import org.wildfly.halos.proxy.dmr.ModelNodeHelper;
-import org.wildfly.halos.proxy.dmr.Operation;
-import org.wildfly.halos.proxy.dmr.ResourceAddress;
-import org.wildfly.halos.proxy.dmr.RunningMode;
-import org.wildfly.halos.proxy.dmr.ServerState;
-import org.wildfly.halos.proxy.dmr.SuspendState;
-
-import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.operators.multi.processors.UnicastProcessor;
-
-import de.skuzzle.semantic.Version;
-
 import static java.util.Collections.synchronizedMap;
 import static org.wildfly.halos.proxy.InstanceModification.Modification.ADDED;
 import static org.wildfly.halos.proxy.InstanceModification.Modification.REMOVED;
@@ -59,13 +33,45 @@ import static org.wildfly.halos.proxy.dmr.ModelDescriptionConstants.SERVER_STATE
 import static org.wildfly.halos.proxy.dmr.ModelDescriptionConstants.SUSPEND_STATE;
 import static org.wildfly.halos.proxy.dmr.ModelDescriptionConstants.UUID;
 
+import java.io.IOException;
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.jboss.as.controller.client.ModelControllerClient;
+import org.jboss.as.controller.client.ModelControllerClientConfiguration;
+import org.jboss.dmr.ModelNode;
+import org.jboss.logging.Logger;
+import org.wildfly.halos.proxy.dmr.Dispatcher;
+import org.wildfly.halos.proxy.dmr.ModelNodeHelper;
+import org.wildfly.halos.proxy.dmr.Operation;
+import org.wildfly.halos.proxy.dmr.ResourceAddress;
+import org.wildfly.halos.proxy.dmr.RunningMode;
+import org.wildfly.halos.proxy.dmr.ServerState;
+import org.wildfly.halos.proxy.dmr.SuspendState;
+
+import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.operators.multi.processors.UnicastProcessor;
+
+import de.skuzzle.semantic.Version;
+
 @ApplicationScoped
 class InstanceRepository {
 
+    private static final int DEFAULT_TIMEOUT = 10; // seconds
     private static final Logger log = Logger.getLogger(InstanceRepository.class);
 
     @Inject
-    ContainerRepository containers;
+    ContainerRepository containerRepository;
+
+    @ConfigProperty(name = "halos.mcc.timeout")
+    Optional<Integer> timeout;
 
     private final Map<Container, ModelControllerClient> clients;
     private final Map<Container, Instance> instances;
@@ -80,7 +86,7 @@ class InstanceRepository {
     }
 
     void lookup() {
-        Set<Container> containers = this.containers.lookup();
+        Set<Container> containers = containerRepository.lookup();
         ContainerDiff diff = new ContainerDiff(clients.keySet(), containers);
 
         log.debugf("Added containers: %s", diff.added());
@@ -114,7 +120,7 @@ class InstanceRepository {
     private ModelControllerClient modelControllerClient(final Container container) {
         ModelControllerClientConfiguration configuration = new ModelControllerClientConfiguration.Builder()
                 .setProtocol("remote+http").setHostName(container.ip()).setPort(container.port())
-                .setConnectionTimeout(((int) Duration.ofSeconds(5).toMillis())).build();
+                .setConnectionTimeout(((int) Duration.ofSeconds(timeout.orElse(DEFAULT_TIMEOUT)).toMillis())).build();
         return ModelControllerClient.Factory.create(configuration);
     }
 

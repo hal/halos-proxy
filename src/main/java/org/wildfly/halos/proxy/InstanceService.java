@@ -26,7 +26,7 @@ class InstanceService {
     @Inject
     InstanceRepository instanceRepository;
 
-    @Scheduled(every = "2s")
+    @Scheduled(every = "10s")
     void refresh() {
         instanceRepository.lookup();
     }

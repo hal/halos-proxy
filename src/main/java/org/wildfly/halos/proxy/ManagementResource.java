@@ -15,6 +15,8 @@
  */
 package org.wildfly.halos.proxy;
 
+import static org.wildfly.halos.proxy.dmr.ModelNodeMessageBodyWriter.DMR_ENCODED;
+
 import java.io.InputStream;
 
 import javax.ws.rs.Consumes;
@@ -24,8 +26,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-
-import static org.wildfly.halos.proxy.dmr.ModelNodeMessageBodyWriter.DMR_ENCODED;
 
 @Path("/api/v1/management")
 @Consumes(DMR_ENCODED)

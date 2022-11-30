@@ -15,13 +15,13 @@
  */
 package org.wildfly.halos.proxy;
 
-import java.util.Set;
-
-import org.junit.jupiter.api.Test;
-
 import static java.util.Collections.emptySet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.Set;
+
+import org.junit.jupiter.api.Test;
 
 class ContainerDiffTest {
 
@@ -102,7 +102,7 @@ class ContainerDiffTest {
         assertTrue(diff.removed().contains(container(2)));
     }
 
-    Container container(int data) {
+    Container container(final int data) {
         return new Container(String.valueOf(data), String.format("%1$d.%1$d.%1$d.%1$d", data), data);
     }
 }

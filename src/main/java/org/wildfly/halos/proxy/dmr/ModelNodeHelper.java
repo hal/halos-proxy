@@ -15,6 +15,9 @@
  */
 package org.wildfly.halos.proxy.dmr;
 
+import static com.google.common.base.CaseFormat.LOWER_HYPHEN;
+import static com.google.common.base.CaseFormat.UPPER_UNDERSCORE;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
@@ -26,9 +29,6 @@ import org.jboss.dmr.Property;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
-
-import static com.google.common.base.CaseFormat.LOWER_HYPHEN;
-import static com.google.common.base.CaseFormat.UPPER_UNDERSCORE;
 
 /**
  * Static helper methods for dealing with {@link ModelNode}s. Some methods accept a path parameter * separated by "." to get a
