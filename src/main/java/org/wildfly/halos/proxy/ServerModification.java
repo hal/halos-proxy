@@ -13,9 +13,11 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.wildfly.halos.proxy.dmr;
+package org.wildfly.halos.proxy;
 
-/** State as defined by {@code server.server-state} */
-public enum ServerState {
-    STARTING, RUNNING, STOPPED, RESTART_REQUIRED, RELOAD_REQUIRED, UNDEFINED
+/**
+ * Information about an added or removed WildFly server.
+ */
+public record ServerModification(Modification modification, Server server) {
+
 }

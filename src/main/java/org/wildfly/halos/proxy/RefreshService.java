@@ -13,9 +13,25 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.wildfly.halos.proxy.dmr;
+package org.wildfly.halos.proxy;
 
-/** Suspend state defined by {@code server.suspend-state} */
-public enum SuspendState {
-    RUNNING, PRE_SUSPEND, SUSPENDING, SUSPENDED, UNDEFINED
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+
+import io.quarkus.scheduler.Scheduled;
+
+@ApplicationScoped
+class RefreshService {
+
+    @Inject
+    ServerRepository serverRepository;
+
+    @Inject
+    DeploymentRepository deploymentRepository;
+
+    @Scheduled(every = "50000s")
+    void refresh() {
+        serverRepository.lookup();
+        deploymentRepository.lookup();
+    }
 }

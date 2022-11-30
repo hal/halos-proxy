@@ -15,16 +15,7 @@
  */
 package org.wildfly.halos.proxy;
 
-import org.wildfly.halos.proxy.dmr.RunningMode;
-import org.wildfly.halos.proxy.dmr.ServerState;
-import org.wildfly.halos.proxy.dmr.SuspendState;
-
-import de.skuzzle.semantic.Version;
-
-/**
- * WildFly instance with a valid connection to the management interface.
- */
-public record Instance(String containerId, String serverId, String serverName, String productName, Version productVersion,
-        Version coreVersion, Version managementVersion, RunningMode runningMode, ServerState serverState,
-        SuspendState suspendState) {
+/** State as defined by {@code server.server-state} */
+public enum ServerState {
+    STARTING, RUNNING, STOPPED, RESTART_REQUIRED, RELOAD_REQUIRED, UNDEFINED
 }

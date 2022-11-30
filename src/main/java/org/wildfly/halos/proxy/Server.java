@@ -15,8 +15,12 @@
  */
 package org.wildfly.halos.proxy;
 
+import de.skuzzle.semantic.Version;
+
 /**
- * WildFly management interface
+ * WildFly server.
  */
-record ManagementInterface(String uid, String name, String hostname, int port) {
+public record Server(String uid, String serverId, String serverName, String productName, Version productVersion,
+        Version coreVersion, Version managementVersion, RunningMode runningMode, ServerState serverState,
+        SuspendState suspendState) {
 }

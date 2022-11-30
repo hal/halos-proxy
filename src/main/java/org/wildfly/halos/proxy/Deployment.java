@@ -15,12 +15,8 @@
  */
 package org.wildfly.halos.proxy;
 
-/**
- * An added or removed WildFly instance.
- */
-public record InstanceModification(Modification modification, Instance instance) {
+import java.time.LocalDateTime;
 
-    public enum Modification {
-        ADDED, REMOVED
-    }
+public record Deployment(Server server, String name, DeploymentStatus status, boolean enabled, LocalDateTime disabledAt,
+        LocalDateTime enabledAt) {
 }

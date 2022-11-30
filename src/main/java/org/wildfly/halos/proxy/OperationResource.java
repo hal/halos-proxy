@@ -41,12 +41,12 @@ import static org.wildfly.halos.proxy.dmr.ModelNodeMessageBodyWriter.DMR_ENCODED
 public class OperationResource {
 
     @Inject
-    InstanceRepository instanceRepository;
+    ServerRepository serverRepository;
 
     @POST
     @Path("/{id}")
     public Response executeSingle(@PathParam("id") final String id, final InputStream inputStream) {
-        ModelControllerClient client = instanceRepository.getClient(id);
+        ModelControllerClient client = serverRepository.getClient(id);
         if (client != null) {
             try {
                 ModelNode modelNode = ModelNode.fromBase64(inputStream);

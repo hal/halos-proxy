@@ -88,13 +88,16 @@ class ManagementInterfaceRepository {
                     // remember service name
                     String serviceName = route.getSpec().getTo().getName();
                     serviceNames.add(serviceName);
-                    Log.debugf("Route %s refers to service %s", name, serviceName);
                 }
                 ManagementInterface managementInterface = new ManagementInterface(id, name, host, port);
                 managementInterfaces.add(managementInterface);
-                Log.debugf("Add management interface %s from route %s", managementInterface, name);
+                Log.infof("Found management interface %s for route %s", managementInterface, name);
             }
+        } catch (KubernetesClientException e) {
+            Log.errorf("Unable to read routes: %s", e.getMessage());
+        }
 
+        try {
             Log.debugf("Lookup services using labels %s", labels);
             ServiceList services = oc.services().withLabels(labels).list();
             Log.debugf("Found %d services", services.getItems().size());
@@ -111,12 +114,12 @@ class ManagementInterfaceRepository {
                         int servicePort = port.getPort();
                         ManagementInterface managementInterface = new ManagementInterface(id, name, host, servicePort);
                         managementInterfaces.add(managementInterface);
-                        Log.debugf("Add management interface %s from service %s", managementInterface, name);
+                        Log.infof("Found management interface %s for service %s", managementInterface, name);
                     }
                 }
             }
         } catch (KubernetesClientException e) {
-            Log.errorf("Unable to read pods: %s", e.getMessage());
+            Log.errorf("Unable to read services: %s", e.getMessage());
         }
         return managementInterfaces;
     }

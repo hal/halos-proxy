@@ -13,9 +13,25 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.wildfly.halos.proxy.dmr;
+package org.wildfly.halos.proxy;
 
-/** Mode as defined by {@code server.running-mode} */
-public enum RunningMode {
-    NORMAL, ADMIN_ONLY, UNDEFINED
+import java.util.Collection;
+
+import javax.inject.Inject;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+
+@Path("/api/v1/deployment")
+@Produces(MediaType.APPLICATION_JSON)
+public class DeploymentResource {
+
+    @Inject
+    DeploymentRepository deploymentRepository;
+
+    @GET
+    public Collection<Deployment> deployments() {
+        return deploymentRepository.getDeployments();
+    }
 }

@@ -15,8 +15,10 @@
  */
 package org.wildfly.halos.proxy;
 
+import org.jboss.as.controller.client.ModelControllerClient;
+
 /**
- * WildFly management interface
+ * (M)anagement interface, (i)nstance and model controller (c)lient
  */
-record ManagementInterface(String uid, String name, String hostname, int port) {
+record MIC(ManagementInterface managementInterface, Server server, ModelControllerClient client) {
 }

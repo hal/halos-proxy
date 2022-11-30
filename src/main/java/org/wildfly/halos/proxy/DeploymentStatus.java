@@ -15,28 +15,6 @@
  */
 package org.wildfly.halos.proxy;
 
-import javax.inject.Inject;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-
-import org.jboss.resteasy.reactive.RestStreamElementType;
-
-import io.smallrye.mutiny.Multi;
-
-@Path("/api/v1/instance")
-@Produces(MediaType.TEXT_PLAIN)
-public class InstanceResource {
-
-    @Inject
-    InstanceRepository instanceRepository;
-
-    @GET
-    @Path("/subscribe")
-    @Produces(MediaType.SERVER_SENT_EVENTS)
-    @RestStreamElementType(MediaType.APPLICATION_JSON)
-    public Multi<InstanceModification> modifications() {
-        return instanceRepository.getModifications();
-    }
+public enum DeploymentStatus {
+    OK, FAILED, STOPPED, UNDEFINED
 }

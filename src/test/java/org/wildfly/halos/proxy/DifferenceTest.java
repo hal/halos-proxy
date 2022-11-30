@@ -23,11 +23,11 @@ import static java.util.Collections.emptySet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class ManagementInterfaceDiffTest {
+class DifferenceTest {
 
     @Test
     void empty() {
-        ManagementInterfaceDiff diff = new ManagementInterfaceDiff(emptySet(), emptySet());
+        Difference<ManagementInterface> diff = new Difference<>(emptySet(), emptySet(), ManagementInterface::uid);
 
         assertTrue(diff.added().isEmpty());
         assertTrue(diff.removed().isEmpty());
@@ -35,8 +35,8 @@ class ManagementInterfaceDiffTest {
 
     @Test
     void unchangedOne() {
-        ManagementInterfaceDiff diff = new ManagementInterfaceDiff(Set.of(managementInterface(1)),
-                Set.of(managementInterface(1)));
+        Difference<ManagementInterface> diff = new Difference<>(Set.of(managementInterface(1)), Set.of(managementInterface(1)),
+                ManagementInterface::uid);
 
         assertTrue(diff.added().isEmpty());
         assertTrue(diff.removed().isEmpty());
@@ -44,8 +44,8 @@ class ManagementInterfaceDiffTest {
 
     @Test
     void unchangedMany() {
-        ManagementInterfaceDiff diff = new ManagementInterfaceDiff(Set.of(managementInterface(1), managementInterface(2)),
-                Set.of(managementInterface(1), managementInterface(2)));
+        Difference<ManagementInterface> diff = new Difference<>(Set.of(managementInterface(1), managementInterface(2)),
+                Set.of(managementInterface(1), managementInterface(2)), ManagementInterface::uid);
 
         assertTrue(diff.added().isEmpty());
         assertTrue(diff.removed().isEmpty());
@@ -53,7 +53,8 @@ class ManagementInterfaceDiffTest {
 
     @Test
     void addedOne() {
-        ManagementInterfaceDiff diff = new ManagementInterfaceDiff(emptySet(), Set.of(managementInterface(1)));
+        Difference<ManagementInterface> diff = new Difference<>(emptySet(), Set.of(managementInterface(1)),
+                ManagementInterface::uid);
 
         assertEquals(1, diff.added().size());
         assertEquals(managementInterface(1), diff.added().iterator().next());
@@ -62,8 +63,9 @@ class ManagementInterfaceDiffTest {
 
     @Test
     void addedMany() {
-        ManagementInterfaceDiff diff = new ManagementInterfaceDiff(Set.of(managementInterface(1), managementInterface(2)),
-                Set.of(managementInterface(1), managementInterface(2), managementInterface(3), managementInterface(4)));
+        Difference<ManagementInterface> diff = new Difference<>(Set.of(managementInterface(1), managementInterface(2)),
+                Set.of(managementInterface(1), managementInterface(2), managementInterface(3), managementInterface(4)),
+                ManagementInterface::uid);
 
         assertEquals(2, diff.added().size());
         assertTrue(diff.added().contains(managementInterface(3)));
@@ -74,7 +76,8 @@ class ManagementInterfaceDiffTest {
     @Test
     void removedOne() {
         ManagementInterface managementInterface = managementInterface(1);
-        ManagementInterfaceDiff diff = new ManagementInterfaceDiff(Set.of(managementInterface), emptySet());
+        Difference<ManagementInterface> diff = new Difference<>(Set.of(managementInterface), emptySet(),
+                ManagementInterface::uid);
 
         assertTrue(diff.added().isEmpty());
         assertEquals(1, diff.removed().size());
@@ -83,9 +86,9 @@ class ManagementInterfaceDiffTest {
 
     @Test
     void removedMany() {
-        ManagementInterfaceDiff diff = new ManagementInterfaceDiff(
+        Difference<ManagementInterface> diff = new Difference<>(
                 Set.of(managementInterface(1), managementInterface(2), managementInterface(3), managementInterface(4)),
-                Set.of(managementInterface(1), managementInterface(2)));
+                Set.of(managementInterface(1), managementInterface(2)), ManagementInterface::uid);
 
         assertTrue(diff.added().isEmpty());
         assertEquals(2, diff.removed().size());
@@ -95,8 +98,8 @@ class ManagementInterfaceDiffTest {
 
     @Test
     void addedRemoved() {
-        ManagementInterfaceDiff diff = new ManagementInterfaceDiff(Set.of(managementInterface(1), managementInterface(2)),
-                Set.of(managementInterface(3), managementInterface(4)));
+        Difference<ManagementInterface> diff = new Difference<>(Set.of(managementInterface(1), managementInterface(2)),
+                Set.of(managementInterface(3), managementInterface(4)), ManagementInterface::uid);
 
         assertEquals(2, diff.added().size());
         assertTrue(diff.added().contains(managementInterface(3)));

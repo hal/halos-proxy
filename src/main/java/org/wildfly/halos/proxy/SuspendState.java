@@ -15,19 +15,7 @@
  */
 package org.wildfly.halos.proxy;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-
-import io.quarkus.scheduler.Scheduled;
-
-@ApplicationScoped
-class InstanceService {
-
-    @Inject
-    InstanceRepository instanceRepository;
-
-    @Scheduled(every = "3600s")
-    void refresh() {
-        instanceRepository.lookup();
-    }
+/** Suspend state defined by {@code server.suspend-state} */
+public enum SuspendState {
+    RUNNING, PRE_SUSPEND, SUSPENDING, SUSPENDED, UNDEFINED
 }

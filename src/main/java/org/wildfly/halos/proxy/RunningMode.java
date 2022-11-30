@@ -15,8 +15,7 @@
  */
 package org.wildfly.halos.proxy;
 
-/**
- * WildFly management interface
- */
-record ManagementInterface(String uid, String name, String hostname, int port) {
+/** Mode as defined by {@code server.running-mode} */
+public enum RunningMode {
+    NORMAL, ADMIN_ONLY, UNDEFINED
 }

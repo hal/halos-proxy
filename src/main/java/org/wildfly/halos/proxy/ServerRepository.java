@@ -34,9 +34,6 @@ import org.wildfly.halos.proxy.dmr.Dispatcher;
 import org.wildfly.halos.proxy.dmr.ModelNodeHelper;
 import org.wildfly.halos.proxy.dmr.Operation;
 import org.wildfly.halos.proxy.dmr.ResourceAddress;
-import org.wildfly.halos.proxy.dmr.RunningMode;
-import org.wildfly.halos.proxy.dmr.ServerState;
-import org.wildfly.halos.proxy.dmr.SuspendState;
 
 import io.quarkus.logging.Log;
 import io.smallrye.mutiny.Multi;
@@ -45,8 +42,9 @@ import io.smallrye.mutiny.operators.multi.processors.UnicastProcessor;
 import de.skuzzle.semantic.Version;
 
 import static java.util.Collections.synchronizedMap;
-import static org.wildfly.halos.proxy.InstanceModification.Modification.ADDED;
-import static org.wildfly.halos.proxy.InstanceModification.Modification.REMOVED;
+import static java.util.stream.Collectors.toSet;
+import static org.wildfly.halos.proxy.Modification.ADDED;
+import static org.wildfly.halos.proxy.Modification.REMOVED;
 import static org.wildfly.halos.proxy.dmr.ModelDescriptionConstants.ATTRIBUTES_ONLY;
 import static org.wildfly.halos.proxy.dmr.ModelDescriptionConstants.INCLUDE_RUNTIME;
 import static org.wildfly.halos.proxy.dmr.ModelDescriptionConstants.MANAGEMENT_MAJOR_VERSION;
@@ -63,54 +61,70 @@ import static org.wildfly.halos.proxy.dmr.ModelDescriptionConstants.SUSPEND_STAT
 import static org.wildfly.halos.proxy.dmr.ModelDescriptionConstants.UUID;
 
 @ApplicationScoped
-class InstanceRepository {
+class ServerRepository {
 
     private static final String REMOTE_HTTP = "remote+http";
 
     @Inject
     ManagementInterfaceRepository managementInterfaceRepository;
 
-    private final Map<ManagementInterface, ModelControllerClient> clients;
-    private final Map<ManagementInterface, Instance> instances;
-    private final UnicastProcessor<InstanceModification> processor;
-    private final Multi<InstanceModification> modifications;
+    private final Map<String, MIC> micById;
+    private final Map<ManagementInterface, MIC> micByManagementInterface;
+    private final UnicastProcessor<ServerModification> processor;
+    private final Multi<ServerModification> modifications;
 
-    InstanceRepository() {
-        this.clients = synchronizedMap(new HashMap<>());
-        this.instances = synchronizedMap(new HashMap<>());
+    ServerRepository() {
+        this.micById = synchronizedMap(new HashMap<>());
+        this.micByManagementInterface = synchronizedMap(new HashMap<>());
         this.processor = UnicastProcessor.create();
         this.modifications = processor.broadcast().toAllSubscribers().onOverflow().dropPreviousItems();
     }
 
     void lookup() {
-        Set<ManagementInterface> managementInterfaces = managementInterfaceRepository.lookup();
-        ManagementInterfaceDiff diff = new ManagementInterfaceDiff(clients.keySet(), managementInterfaces);
+        Difference<ManagementInterface> difference = new Difference<>(micByManagementInterface.keySet(),
+                managementInterfaceRepository.lookup(), ManagementInterface::uid);
 
-        Log.debugf("Added management interfaces: %s", diff.added());
-        for (ManagementInterface managementInterface : diff.added()) {
+        Log.debugf("Added management interfaces: %s", difference.added());
+        for (ManagementInterface managementInterface : difference.added()) {
             try {
                 ModelControllerClient client = modelControllerClient(managementInterface);
-                Instance instance = readWildFlyInstance(client, managementInterface);
-                clients.put(managementInterface, client);
-                instances.put(managementInterface, instance);
-                processor.onNext(new InstanceModification(ADDED, instance));
+                Server server = readInstance(client, managementInterface);
+                add(managementInterface, server, client);
             } catch (Exception e) {
-                Log.errorf("Unable to add new management interface %s: %s", managementInterface, e.getMessage());
+                Log.errorf("Unable to add server for management interface %s: %s", managementInterface, e.getMessage());
             }
         }
 
-        Log.debugf("Removed management interfaces: %s", diff.removed());
-        for (ManagementInterface managementInterface : diff.removed()) {
-            ModelControllerClient client = clients.remove(managementInterface);
-            if (client != null) {
+        Log.debugf("Removed management interfaces: %s", difference.removed());
+        for (ManagementInterface managementInterface : difference.removed()) {
+            remove(managementInterface);
+        }
+    }
+
+    private void add(final ManagementInterface managementInterface, final Server server, final ModelControllerClient client) {
+        MIC mic = new MIC(managementInterface, server, client);
+        micById.put(managementInterface.uid(), mic);
+        micByManagementInterface.put(managementInterface, mic);
+        processor.onNext(new ServerModification(ADDED, server));
+        Log.infof("Add server %s", server);
+    }
+
+    private void remove(final ManagementInterface managementInterface) {
+        MIC mic = micById.remove(managementInterface.uid());
+        MIC mic2 = micByManagementInterface.remove(managementInterface);
+        if (mic != null && mic2 != null) {
+            // noinspection resource
+            if (mic.client() != null) {
                 try {
-                    client.close();
+                    mic.client().close();
                 } catch (IOException e) {
                     Log.errorf("Unable to close client for management interface %s: %s", managementInterface, e.getMessage());
                 }
             }
-            Instance instance = instances.remove(managementInterface);
-            processor.onNext(new InstanceModification(REMOVED, instance));
+            processor.onNext(new ServerModification(REMOVED, mic.server()));
+            Log.infof("Remove server %s", mic.server());
+        } else if (mic != null || mic2 != null) {
+            Log.warnf("Unbalanced registries for management interface %s", managementInterface);
         }
     }
 
@@ -131,7 +145,7 @@ class InstanceRepository {
                 });
     }
 
-    private Instance readWildFlyInstance(final ModelControllerClient client, final ManagementInterface managementInterface) {
+    private Server readInstance(final ModelControllerClient client, final ManagementInterface managementInterface) {
         Operation operation = new Operation.Builder(ResourceAddress.root(), READ_RESOURCE_OPERATION)
                 .param(ATTRIBUTES_ONLY, true).param(INCLUDE_RUNTIME, true).build();
         ModelNode modelNode = new Dispatcher(client).execute(operation);
@@ -139,8 +153,8 @@ class InstanceRepository {
         String serverId = modelNode.get(UUID).asString();
         String serverName = modelNode.get(NAME).asString();
         String productName = modelNode.get(PRODUCT_NAME).asString();
-        Version productVersion = Version.parseVersion(makeSemantic(modelNode.get(PRODUCT_VERSION).asString()));
-        Version coreVersion = Version.parseVersion(makeSemantic(modelNode.get(RELEASE_VERSION).asString()));
+        Version productVersion = parseVersion(managementInterface, PRODUCT_VERSION, modelNode.get(PRODUCT_VERSION).asString());
+        Version coreVersion = parseVersion(managementInterface, RELEASE_VERSION, modelNode.get(RELEASE_VERSION).asString());
         Version managementVersion = parseManagementVersion(modelNode);
         RunningMode runningMode = ModelNodeHelper.asEnumValue(modelNode, RUNNING_MODE, RunningMode::valueOf,
                 RunningMode.UNDEFINED);
@@ -149,12 +163,19 @@ class InstanceRepository {
         SuspendState suspendState = ModelNodeHelper.asEnumValue(modelNode, SUSPEND_STATE, SuspendState::valueOf,
                 SuspendState.UNDEFINED);
 
-        return new Instance(managementInterface.id(), serverId, serverName, productName, productVersion, coreVersion,
+        return new Server(managementInterface.uid(), serverId, serverName, productName, productVersion, coreVersion,
                 managementVersion, runningMode, serverState, suspendState);
     }
 
-    private String makeSemantic(final String version) {
-        return version.replace(".Final", "-Final");
+    private Version parseVersion(final ManagementInterface managementInterface, final String field, final String version) {
+        String safeVersion = version.replace(".Final", "");
+        try {
+            return Version.parseVersion(safeVersion);
+        } catch (Exception e) {
+            Log.errorf("Unable to parse %s as version for %s, field %s: %s", safeVersion, managementInterface, field,
+                    e.getMessage());
+            return Version.ZERO;
+        }
     }
 
     private Version parseManagementVersion(final ModelNode modelNode) {
@@ -169,11 +190,15 @@ class InstanceRepository {
     }
 
     ModelControllerClient getClient(final String id) {
-        return clients.entrySet().stream().filter(entry -> id.equals(entry.getKey().id())).map(Map.Entry::getValue).findAny()
-                .orElse(null);
+        MIC mic = micById.get(id);
+        return mic != null ? mic.client() : null;
     }
 
-    Multi<InstanceModification> getModifications() {
+    Set<Server> getInstances() {
+        return micById.values().stream().map(MIC::server).collect(toSet());
+    }
+
+    Multi<ServerModification> getModifications() {
         return modifications;
     }
 }

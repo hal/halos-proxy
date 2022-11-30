@@ -15,8 +15,6 @@
  */
 package org.wildfly.halos.proxy;
 
-/**
- * WildFly management interface
- */
-record ManagementInterface(String uid, String name, String hostname, int port) {
+public enum Modification {
+    ADDED, REMOVED
 }

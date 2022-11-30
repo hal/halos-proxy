@@ -15,6 +15,9 @@
  */
 package org.wildfly.halos.proxy.dmr;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
@@ -85,7 +88,7 @@ public final class ModelNodeHelper {
     }
 
     /**
-     * Tries to get a deeply nested boolean value from the specified model node. Nested paths must be separated with "/".
+     * Tries to get a deeply nested boolean value from the specified model node. Nested paths must be separated with ".".
      *
      * @param modelNode The model node to read from
      * @param path A path separated with "."
@@ -94,6 +97,14 @@ public final class ModelNodeHelper {
     public static boolean failSafeBoolean(final ModelNode modelNode, final String path) {
         ModelNode attribute = failSafeGet(modelNode, path);
         return attribute.isDefined() && attribute.asBoolean();
+    }
+
+    public static LocalDateTime failSafeLocalDateTime(final ModelNode modelNode, final String path) {
+        ModelNode attribute = failSafeGet(modelNode, path);
+        if (attribute.isDefined()) {
+            return Instant.ofEpochMilli(attribute.asLong()).atZone(ZoneId.systemDefault()).toLocalDateTime();
+        }
+        return null;
     }
 
     public static List<ModelNode> failSafeList(final ModelNode modelNode, final String path) {
