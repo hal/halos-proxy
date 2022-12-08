@@ -15,7 +15,7 @@
  */
 package org.wildfly.halos.proxy;
 
-import java.util.Collection;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -35,8 +35,8 @@ public class ServerResource {
     ServerRepository serverRepository;
 
     @GET
-    public Collection<Server> servers() {
-        return serverRepository.getInstances();
+    public Set<Server> servers() {
+        return serverRepository.servers();
     }
 
     @GET
@@ -44,6 +44,6 @@ public class ServerResource {
     @Produces(MediaType.SERVER_SENT_EVENTS)
     @RestStreamElementType(MediaType.APPLICATION_JSON)
     public Multi<ServerModification> modifications() {
-        return serverRepository.getModifications();
+        return serverRepository.modifications();
     }
 }

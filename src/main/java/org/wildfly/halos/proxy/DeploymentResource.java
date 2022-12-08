@@ -15,7 +15,7 @@
  */
 package org.wildfly.halos.proxy;
 
-import java.util.Collection;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -31,7 +31,7 @@ public class DeploymentResource {
     DeploymentRepository deploymentRepository;
 
     @GET
-    public Collection<Deployment> deployments() {
-        return deploymentRepository.getDeployments();
+    public Set<Deployment> deployments() {
+        return deploymentRepository.deployments();
     }
 }

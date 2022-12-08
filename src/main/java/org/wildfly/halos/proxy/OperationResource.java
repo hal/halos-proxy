@@ -46,7 +46,7 @@ public class OperationResource {
     @POST
     @Path("/{id}")
     public Response executeSingle(@PathParam("id") final String id, final InputStream inputStream) {
-        ModelControllerClient client = serverRepository.getClient(id);
+        ModelControllerClient client = serverRepository.client(id);
         if (client != null) {
             try {
                 ModelNode modelNode = ModelNode.fromBase64(inputStream);

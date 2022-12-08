@@ -146,10 +146,6 @@
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-openshift-client</artifactId>
         </dependency>
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-scheduler</artifactId>
-        </dependency>
 <!--
         <dependency>
           <groupId>io.quarkiverse.quinoa</groupId>

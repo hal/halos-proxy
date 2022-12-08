@@ -17,10 +17,22 @@ package org.wildfly.halos.proxy;
 
 import de.skuzzle.semantic.Version;
 
-/**
- * WildFly server.
- */
-public record Server(String uid, String serverId, String serverName, String productName, Version productVersion,
-        Version coreVersion, Version managementVersion, RunningMode runningMode, ServerState serverState,
-        SuspendState suspendState) {
+public record Server(String id, String serverId, String serverName, String productName, Version productVersion,
+        Version coreVersion, Version managementVersion, ConnectionStatus connectionStatus, RunningMode runningMode,
+        ServerState serverState, SuspendState suspendState) {
+
+    static Server noPods(final String id, final String name) {
+        return new Server(id, "", name, "", Version.ZERO, Version.ZERO, Version.ZERO, ConnectionStatus.NO_PODS,
+                RunningMode.UNDEFINED, ServerState.UNDEFINED, SuspendState.UNDEFINED);
+    }
+
+    static Server connectionError(final String id, final String name) {
+        return new Server(id, "", name, "", Version.ZERO, Version.ZERO, Version.ZERO, ConnectionStatus.ERROR,
+                RunningMode.UNDEFINED, ServerState.UNDEFINED, SuspendState.UNDEFINED);
+    }
+
+    Server withHostAndPort(final String host, final int port) {
+        return new Server(id, serverId, serverName, productName, productVersion, coreVersion, managementVersion,
+                connectionStatus, runningMode, serverState, suspendState);
+    }
 }

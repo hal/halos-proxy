@@ -15,9 +15,7 @@
  */
 package org.wildfly.halos.proxy;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -32,8 +30,8 @@ import org.wildfly.halos.proxy.dmr.Operation;
 import org.wildfly.halos.proxy.dmr.ResourceAddress;
 
 import io.quarkus.logging.Log;
+import io.smallrye.mutiny.tuples.Tuple2;
 
-import static java.util.Collections.synchronizedMap;
 import static org.wildfly.halos.proxy.dmr.ModelDescriptionConstants.CHILD_TYPE;
 import static org.wildfly.halos.proxy.dmr.ModelDescriptionConstants.DISABLED_TIME;
 import static org.wildfly.halos.proxy.dmr.ModelDescriptionConstants.ENABLED;
@@ -48,49 +46,21 @@ class DeploymentRepository {
     @Inject
     ServerRepository serverRepository;
 
-    private final Map<Server, Deployment> deployments;
-
-    DeploymentRepository() {
-        this.deployments = synchronizedMap(new HashMap<>());
-    }
-
-    void lookup() {
-        Difference<Server> difference = new Difference<>(deployments.keySet(), serverRepository.getInstances(), Server::uid);
-
-        Log.debugf("Added servers: %s", difference.added());
-        for (Server server : difference.added()) {
-            ModelControllerClient client = serverRepository.getClient(server.uid());
-            if (client != null) {
-                try {
-                    Set<Deployment> deployments = readDeployment(server, client);
-                    for (Deployment deployment : deployments) {
-                        add(server, deployment);
-                    }
-                } catch (Exception e) {
-                    Log.errorf("Unable to add deployment for server %s: %s", server, e.getMessage());
-                }
+    Set<Deployment> deployments() {
+        Set<Deployment> deployments = new HashSet<>();
+        for (Tuple2<ModelControllerClient, Server> tuple : serverRepository.clientsServers()) {
+            ModelControllerClient client = tuple.getItem1();
+            Server server = tuple.getItem2();
+            try {
+                deployments.addAll(readDeployments(client, server));
+            } catch (Exception e) {
+                Log.errorf("Unable to read deployment for %s: %s", server, e.getMessage());
             }
         }
-
-        Log.debugf("Removed servers: %s", difference.removed());
-        for (Server server : difference.removed()) {
-            remove(server);
-        }
+        return deployments;
     }
 
-    private void add(final Server server, final Deployment deployment) {
-        deployments.put(server, deployment);
-        Log.infof("Add deployment %s", deployment);
-    }
-
-    private void remove(final Server server) {
-        Deployment deployment = deployments.remove(server);
-        if (deployment != null) {
-            Log.infof("Remove deployment %s", deployment);
-        }
-    }
-
-    private Set<Deployment> readDeployment(final Server server, final ModelControllerClient client) {
+    private Set<Deployment> readDeployments(final ModelControllerClient client, final Server server) {
         Set<Deployment> deployments = new HashSet<>();
 
         Operation operation = new Operation.Builder(ResourceAddress.root(), READ_CHILDREN_RESOURCES_OPERATION)
@@ -112,9 +82,5 @@ class DeploymentRepository {
             }
         }
         return deployments;
-    }
-
-    Set<Deployment> getDeployments() {
-        return Set.copyOf(deployments.values());
     }
 }

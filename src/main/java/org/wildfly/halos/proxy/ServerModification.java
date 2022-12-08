@@ -15,9 +15,35 @@
  */
 package org.wildfly.halos.proxy;
 
-/**
- * Information about an added or removed WildFly server.
- */
 public record ServerModification(Modification modification, Server server) {
 
+    static ServerModification from(final Server current, final Server update) {
+        if (current == null && update != null) {
+            return new ServerModification(Modification.ADDED, update);
+        } else if (current != null && update == null) {
+            return new ServerModification(Modification.REMOVED, current);
+        } else if (current != null && update != null) {
+            return switch (current.connectionStatus()) {
+                case CONNECTED -> switch (update.connectionStatus()) {
+                    case CONNECTED -> new ServerModification(Modification.UPDATED, update);
+                    case NO_PODS -> new ServerModification(Modification.DISCONNECTED, update);
+                    case ERROR -> new ServerModification(Modification.ERROR, update);
+                };
+                case NO_PODS -> switch (update.connectionStatus()) {
+                    case CONNECTED -> new ServerModification(Modification.CONNECTED, update);
+                    case NO_PODS -> new ServerModification(Modification.UPDATED, update);
+                    case ERROR -> new ServerModification(Modification.ERROR, update);
+
+                };
+                case ERROR -> switch (update.connectionStatus()) {
+                    case CONNECTED -> new ServerModification(Modification.CONNECTED, update);
+                    case NO_PODS -> new ServerModification(Modification.DISCONNECTED, update);
+                    case ERROR -> new ServerModification(Modification.UPDATED, update);
+                };
+
+            };
+        } else {
+            throw new IllegalStateException("Illegal state in ServerModification.from(current: null, update: null)");
+        }
+    }
 }

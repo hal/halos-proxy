@@ -16,5 +16,5 @@
 package org.wildfly.halos.proxy;
 
 public enum Modification {
-    ADDED, REMOVED
+    ADDED, CONNECTED, DISCONNECTED, ERROR, UPDATED, REMOVED
 }
