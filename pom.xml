@@ -83,7 +83,7 @@
         <version.jackson>2.13.4.1</version.jackson>
         <version.junit>5.9.1</version.junit>
 <!--        <version.quarkus.quinoa>1.2.3</version.quarkus.quinoa>-->
-        <version.quarkus>2.14.3.Final</version.quarkus>
+        <version.quarkus>2.15.0.Final</version.quarkus>
         <version.semantic.version>2.1.1</version.semantic.version>
         <version.wildfly.quarkus>0.0.1.Final</version.wildfly.quarkus>
 
