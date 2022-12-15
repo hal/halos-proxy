@@ -13,8 +13,11 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.wildfly.halos.proxy;
+package org.wildfly.halos.proxy.wildfly;
 
-public enum DeploymentStatus {
-    OK, FAILED, STOPPED, UNDEFINED
+public class WildFlyException extends RuntimeException {
+
+    public WildFlyException(final String message) {
+        super(message);
+    }
 }

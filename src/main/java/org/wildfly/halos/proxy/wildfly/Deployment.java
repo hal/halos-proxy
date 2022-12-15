@@ -13,8 +13,10 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.wildfly.halos.proxy;
+package org.wildfly.halos.proxy.wildfly;
 
-public enum ConnectionStatus {
-    CONNECTED, NO_PODS, ERROR
+import java.time.LocalDateTime;
+
+public record Deployment(String name, DeploymentStatus status, boolean enabled, LocalDateTime disabledAt,
+        LocalDateTime enabledAt) {
 }

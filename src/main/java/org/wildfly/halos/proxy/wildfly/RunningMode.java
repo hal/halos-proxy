@@ -13,15 +13,9 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.wildfly.halos.proxy.dmr;
+package org.wildfly.halos.proxy.wildfly;
 
-public class DispatchException extends RuntimeException {
-
-    public DispatchException(final String message) {
-        super(message);
-    }
-
-    public DispatchException(final String message, final Throwable cause) {
-        super(message, cause);
-    }
+/** Mode as defined by {@code server.running-mode} */
+public enum RunningMode {
+    NORMAL, ADMIN_ONLY, UNDEFINED
 }

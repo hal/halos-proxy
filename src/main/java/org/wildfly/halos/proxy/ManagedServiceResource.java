@@ -23,15 +23,27 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-@Path("/api/v1/deployment")
+import org.jboss.resteasy.reactive.RestStreamElementType;
+
+import io.smallrye.mutiny.Multi;
+
+@Path("/api/v1/service")
 @Produces(MediaType.APPLICATION_JSON)
-public class DeploymentResource {
+public class ManagedServiceResource {
 
     @Inject
-    DeploymentRepository deploymentRepository;
+    ManagedServiceRepository repository;
 
     @GET
-    public Set<Deployment> deployments() {
-        return deploymentRepository.deployments();
+    public Set<ManagedService> servers() {
+        return repository.managedServices();
+    }
+
+    @GET
+    @Path("/subscribe")
+    @Produces(MediaType.SERVER_SENT_EVENTS)
+    @RestStreamElementType(MediaType.APPLICATION_JSON)
+    public Multi<ManagedServiceModification> modifications() {
+        return repository.modifications();
     }
 }

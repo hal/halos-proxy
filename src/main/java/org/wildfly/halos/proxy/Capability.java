@@ -15,7 +15,10 @@
  */
 package org.wildfly.halos.proxy;
 
-/** Suspend state defined by {@code server.suspend-state} */
-public enum SuspendState {
-    RUNNING, PRE_SUSPEND, SUSPENDING, SUSPENDED, UNDEFINED
+import io.smallrye.mutiny.Uni;
+
+public interface Capability {
+    String id();
+
+    Uni<ManagedService.Status> connect(ManagedService managedService);
 }

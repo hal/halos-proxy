@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.wildfly.halos.proxy.dmr;
+package org.wildfly.halos.proxy.wildfly.dmr;
 
 import java.util.Iterator;
 

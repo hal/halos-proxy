@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.wildfly.halos.proxy.dmr;
+package org.wildfly.halos.proxy.wildfly.dmr;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -32,9 +32,9 @@ import com.google.common.collect.Iterables;
 
 import static com.google.common.base.CaseFormat.LOWER_HYPHEN;
 import static com.google.common.base.CaseFormat.UPPER_UNDERSCORE;
-import static org.wildfly.halos.proxy.dmr.ModelDescriptionConstants.FAILURE_DESCRIPTION;
-import static org.wildfly.halos.proxy.dmr.ModelDescriptionConstants.OUTCOME;
-import static org.wildfly.halos.proxy.dmr.ModelDescriptionConstants.SUCCESS;
+import static org.wildfly.halos.proxy.wildfly.dmr.ModelDescriptionConstants.FAILURE_DESCRIPTION;
+import static org.wildfly.halos.proxy.wildfly.dmr.ModelDescriptionConstants.OUTCOME;
+import static org.wildfly.halos.proxy.wildfly.dmr.ModelDescriptionConstants.SUCCESS;
 
 /**
  * Static helper methods for dealing with {@link ModelNode}s. Some methods accept a path parameter * separated by "." to get a

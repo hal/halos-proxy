@@ -15,8 +15,5 @@
  */
 package org.wildfly.halos.proxy;
 
-import java.time.LocalDateTime;
-
-public record Deployment(Server server, String name, DeploymentStatus status, boolean enabled, LocalDateTime disabledAt,
-        LocalDateTime enabledAt) {
+public record ManagedServiceModification(Modification modification, ManagedService managedService) {
 }

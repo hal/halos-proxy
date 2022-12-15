@@ -13,15 +13,12 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.wildfly.halos.proxy.dmr;
+package org.wildfly.halos.proxy.wildfly.dmr;
 
 import java.util.Iterator;
 
 import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.Property;
-
-import static org.wildfly.halos.proxy.dmr.ModelDescriptionConstants.ADDRESS;
-import static org.wildfly.halos.proxy.dmr.ModelDescriptionConstants.OP;
 
 /**
  * Represents a DMR operation.
@@ -33,21 +30,21 @@ public class Operation extends ModelNode {
     private final ModelNode parameter;
 
     public Operation(final ModelNode modelNode) {
-        this.name = modelNode.get(OP).asString();
-        this.address = new ResourceAddress(modelNode.get(ADDRESS));
+        this.name = modelNode.get(ModelDescriptionConstants.OP).asString();
+        this.address = new ResourceAddress(modelNode.get(ModelDescriptionConstants.ADDRESS));
         this.parameter = modelNode.clone();
-        this.parameter.remove(OP);
-        this.parameter.remove(ADDRESS);
+        this.parameter.remove(ModelDescriptionConstants.OP);
+        this.parameter.remove(ModelDescriptionConstants.ADDRESS);
         set(modelNode.clone());
     }
 
-    private Operation(final Builder builder) {
+    Operation(final Builder builder) {
         this.name = builder.name;
         this.address = builder.address;
         this.parameter = builder.parameter == null ? new ModelNode() : builder.parameter;
         set(this.parameter.clone());
-        get(OP).set(name);
-        get(ADDRESS).set(address);
+        get(ModelDescriptionConstants.OP).set(name);
+        get(ModelDescriptionConstants.ADDRESS).set(address);
     }
 
     private boolean hasParameter() {
@@ -89,7 +86,7 @@ public class Operation extends ModelNode {
      * @return the name of the operation
      */
     public String getName() {
-        return get(OP).asString();
+        return get(ModelDescriptionConstants.OP).asString();
     }
 
     /**

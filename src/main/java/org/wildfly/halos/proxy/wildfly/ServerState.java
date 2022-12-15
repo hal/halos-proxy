@@ -13,8 +13,9 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.wildfly.halos.proxy;
+package org.wildfly.halos.proxy.wildfly;
 
-public enum Modification {
-    ADD, UPDATE, DELETE
+/** State as defined by {@code server.server-state} */
+public enum ServerState {
+    STARTING, RUNNING, STOPPED, RESTART_REQUIRED, RELOAD_REQUIRED, UNDEFINED
 }

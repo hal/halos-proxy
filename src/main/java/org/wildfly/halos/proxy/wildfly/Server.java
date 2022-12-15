@@ -13,9 +13,15 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.wildfly.halos.proxy;
+package org.wildfly.halos.proxy.wildfly;
 
-/** State as defined by {@code server.server-state} */
-public enum ServerState {
-    STARTING, RUNNING, STOPPED, RESTART_REQUIRED, RELOAD_REQUIRED, UNDEFINED
+import java.util.Set;
+
+import org.wildfly.halos.proxy.ManagedService;
+
+import de.skuzzle.semantic.Version;
+
+public record Server(ManagedService service, String id, String serverName, String productName, Version productVersion,
+        Version coreVersion, Version managementVersion, RunningMode runningMode, ServerState serverState,
+        SuspendState suspendState, Set<Deployment> deployments) {
 }

@@ -13,9 +13,8 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.wildfly.halos.proxy;
+package org.wildfly.halos.proxy.wildfly;
 
-/** Mode as defined by {@code server.running-mode} */
-public enum RunningMode {
-    NORMAL, ADMIN_ONLY, UNDEFINED
+public enum DeploymentStatus {
+    OK, FAILED, STOPPED, UNDEFINED
 }

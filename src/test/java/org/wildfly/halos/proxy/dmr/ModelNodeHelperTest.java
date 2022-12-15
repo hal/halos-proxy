@@ -18,6 +18,7 @@ package org.wildfly.halos.proxy.dmr;
 import org.jboss.dmr.ModelNode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.wildfly.halos.proxy.wildfly.dmr.ModelNodeHelper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;

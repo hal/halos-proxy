@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.jboss.dmr.Property;
 import org.junit.jupiter.api.Test;
+import org.wildfly.halos.proxy.wildfly.dmr.ResourceAddress;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;

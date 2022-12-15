@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.wildfly.halos.proxy.dmr;
+package org.wildfly.halos.proxy.wildfly.dmr;
 
 /**
  * String constants frequently used in model descriptions and DMR operations.
@@ -27,7 +27,9 @@ public interface ModelDescriptionConstants {
     String ADDRESS = "address";
     String ATTRIBUTES_ONLY = "attributes-only";
     String CHILD_TYPE = "child-type";
+    String COMPOSITE = "composite";
     String DISABLED_TIME = "disabled-time";
+    String DEPLOYMENT = "deployment";
     String ENABLED = "enabled";
     String ENABLED_TIME = "enabled-time";
     String FAILURE_DESCRIPTION = "failure-description";
@@ -42,11 +44,13 @@ public interface ModelDescriptionConstants {
     String PRODUCT_VERSION = "product-version";
     String READ_CHILDREN_RESOURCES_OPERATION = "read-children-resources";
     String READ_RESOURCE_OPERATION = "read-resource";
+    String RECURSIVE = "recursive";
     String RELEASE_VERSION = "release-version";
     String RESULT = "result";
     String RUNNING_MODE = "running-mode";
     String SERVER_STATE = "server-state";
     String STATUS = "status";
+    String STEPS = "steps";
     String SUCCESS = "success";
     String SUSPEND_STATE = "suspend-state";
     String UUID = "uuid";

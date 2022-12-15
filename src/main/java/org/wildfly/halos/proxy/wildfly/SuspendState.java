@@ -13,8 +13,9 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.wildfly.halos.proxy;
+package org.wildfly.halos.proxy.wildfly;
 
-public enum Modification {
-    ADD, UPDATE, DELETE
+/** Suspend state defined by {@code server.suspend-state} */
+public enum SuspendState {
+    RUNNING, PRE_SUSPEND, SUSPENDING, SUSPENDED, UNDEFINED
 }
