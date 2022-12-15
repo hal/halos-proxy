@@ -84,7 +84,7 @@
         <version.junit>5.9.1</version.junit>
         <version.quarkus>2.15.0.Final</version.quarkus>
         <version.semantic.version>2.1.1</version.semantic.version>
-        <version.wildfly.quarkus>0.0.2-SNAPSHOT</version.wildfly.quarkus>
+        <version.wildfly.quarkus>0.0.1.Final</version.wildfly.quarkus>
 
         <!-- Plugin versions -->
         <version.checkstyle.plugin>3.2.0</version.checkstyle.plugin>
@@ -408,6 +408,7 @@
                             <systemPropertyVariables>
                                 <native.image.path>${project.build.directory}/${project.build.finalName}-runner</native.image.path>
                                 <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+                                <!--suppress MavenModelInspection -->
                                 <maven.home>${maven.home}</maven.home>
                             </systemPropertyVariables>
                         </configuration>
@@ -420,6 +421,7 @@
                 <configuration>
                     <systemPropertyVariables>
                         <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+                        <!--suppress MavenModelInspection -->
                         <maven.home>${maven.home}</maven.home>
                     </systemPropertyVariables>
                 </configuration>

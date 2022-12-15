@@ -15,6 +15,8 @@
  */
 package org.wildfly.halos.proxy.wildfly;
 
+import java.time.Duration;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
@@ -28,9 +30,15 @@ import io.smallrye.mutiny.Uni;
 public class WildFlyCapability implements Capability {
 
     public static final String ID = "wildfly";
+    private static final long INITIAL_BACK_OFF = 1_000;
+    private static final long MAX_BACK_OFF = 5_000;
+    private static final long EXPIRE_IN = 60_000;
 
     @Inject
     ManagementInterface managementInterface;
+
+    @Inject
+    WildFlyServerRepository wildFlyServerRepository;
 
     @Override
     public String id() {
@@ -43,15 +51,26 @@ public class WildFlyCapability implements Capability {
     }
 
     @Override
-    public Uni<ManagedService.Status> connect(final ManagedService managedService) {
-        Log.warnf("connect is not yet implemented for %s", this);
-        return Uni.createFrom().item(managedService.status());
+    public Uni<ManagedService> connect(final ManagedService managedService) {
+        return managementInterface.connect(managedService).onFailure().retry()
+                .withBackOff(Duration.ofMillis(INITIAL_BACK_OFF), Duration.ofMillis(MAX_BACK_OFF)).expireIn(EXPIRE_IN).onItem()
+                .transform(tuple -> {
+                    ManagedService connectedManagedService = managedService.withStatus(ManagedService.Status.CONNECTED);
+                    Log.infof("Successfully connected to %s", connectedManagedService);
+                    wildFlyServerRepository.add(connectedManagedService, tuple.getItem1(), tuple.getItem2());
+                    return connectedManagedService;
+                }).onFailure().recoverWithItem(throwable -> {
+                    ManagedService failedManagedStatus = managedService.withStatus(ManagedService.Status.FAILED);
+                    Log.errorf("Error connecting to %s: %s", failedManagedStatus, throwable.getMessage());
+                    wildFlyServerRepository.delete(failedManagedStatus);
+                    return failedManagedStatus;
+                });
     }
 
     @Override
-    public Uni<Void> close(final ManagedService managedService) {
-        Log.warnf("connect is not yet implemented for %s", this);
-        return Uni.createFrom().voidItem();
+    public void close(final ManagedService managedService) {
+        wildFlyServerRepository.delete(managedService);
+        Log.infof("Close %s and %s", managedService, this);
     }
 
     @Override

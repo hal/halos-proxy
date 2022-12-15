@@ -21,5 +21,5 @@ import org.wildfly.halos.proxy.ManagedService;
 
 import com.google.common.net.HostAndPort;
 
-public record QuarkusService(ManagedService managedService, List<HostAndPort> routes) {
+record QuarkusService(ManagedService managedService, List<HostAndPort> routes) {
 }

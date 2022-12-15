@@ -15,9 +15,23 @@
  */
 package org.wildfly.halos.proxy.wildfly;
 
-public class WildFlyException extends RuntimeException {
+import java.util.Collection;
 
-    public WildFlyException(final String message) {
-        super(message);
+import javax.inject.Inject;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+
+@Path("/api/v1/wildfly/servers")
+@Produces(MediaType.APPLICATION_JSON)
+public class WildFlyServerResource {
+
+    @Inject
+    WildFlyServerRepository repository;
+
+    @GET
+    public Collection<WildFlyServer> servers() {
+        return repository.wildFlyServers();
     }
 }

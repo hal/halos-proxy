@@ -39,14 +39,14 @@ class QuarkusServiceRepository {
         Log.infof("Add %s", quarkusService);
     }
 
-    void delete(final QuarkusService quarkusService) {
-        QuarkusService remove = services.remove(quarkusService.managedService());
-        if (remove != null) {
-            Log.infof("Remove %s", quarkusService);
+    void delete(final ManagedService managedService) {
+        QuarkusService removedService = services.remove(managedService);
+        if (removedService != null) {
+            Log.infof("Remove %s", removedService);
         }
     }
 
-    public Set<QuarkusService> quarkusServices() {
+    Set<QuarkusService> quarkusServices() {
         return Set.copyOf(services.values());
     }
 }

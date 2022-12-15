@@ -90,27 +90,24 @@ public class ManagedServiceRepository {
         ManagedService managedService = services.get(service.getMetadata().getUid());
         if (managedService == null) {
             modification = Modification.ADD;
-            managedService = ManagedService.fromService(service, capability);
+            managedService = ManagedService.fromService(service, capability.id());
         } else {
             modification = Modification.UPDATE;
-            managedService = managedService.addCapability(capability);
+            managedService = managedService.addCapability(capability.id());
         }
         services.put(managedService.id(), managedService);
         publishModification(new ManagedServiceModification(modification, managedService));
+        connect(managedService, capability);
+    }
 
-        // connect capability
-        final ManagedService finalManagedService = managedService;
-        capability.connect(managedService).subscribe().with(status -> {
-            // ok
-            ManagedService connectedManagedService = finalManagedService.withStatus(status);
+    private void connect(final ManagedService managedService, final Capability capability) {
+        capability.connect(managedService).subscribe().with(connectedManagedService -> {
             services.put(connectedManagedService.id(), connectedManagedService);
             publishModification(new ManagedServiceModification(Modification.UPDATE, connectedManagedService));
-            Log.infof("Open %s for %s", capability, connectedManagedService);
         }, throwable -> {
-            // failed
-            ManagedService ums = finalManagedService.withStatus(ManagedService.Status.FAILED);
-            publishModification(new ManagedServiceModification(Modification.UPDATE, ums));
-            Log.errorf("Error connecting %s and %s: %s", finalManagedService, capability, throwable.getMessage());
+            ManagedService failed = managedService.withStatus(ManagedService.Status.FAILED);
+            services.put(failed.id(), failed);
+            publishModification(new ManagedServiceModification(Modification.UPDATE, failed));
         });
     }
 
@@ -118,10 +115,11 @@ public class ManagedServiceRepository {
         ManagedService managedService = services.remove(service.getMetadata().getUid());
         if (managedService != null) {
             publishModification(new ManagedServiceModification(Modification.DELETE, managedService));
-            for (Capability capability : managedService.capabilities()) {
-                capability.close(managedService).subscribe()
-                        .with(unused -> Log.infof("Close %s for %s", capability, managedService), throwable -> Log
-                                .errorf("Error closing %s for %s: %s", capability, managedService, throwable.getMessage()));
+            for (String id : managedService.capabilities()) {
+                Capability capability = capabilities.capability(id);
+                if (capability != null) {
+                    capability.close(managedService);
+                }
             }
         }
     }

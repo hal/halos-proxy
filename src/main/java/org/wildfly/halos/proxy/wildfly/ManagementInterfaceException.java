@@ -13,16 +13,11 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.wildfly.halos.proxy;
+package org.wildfly.halos.proxy.wildfly;
 
-import io.smallrye.mutiny.Uni;
+public class ManagementInterfaceException extends RuntimeException {
 
-public interface Capability {
-    String id();
-
-    String title();
-
-    Uni<ManagedService> connect(ManagedService managedService);
-
-    void close(ManagedService managedService);
+    public ManagementInterfaceException(final String message) {
+        super(message);
+    }
 }

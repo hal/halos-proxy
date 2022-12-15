@@ -73,6 +73,15 @@ public class Capabilities {
         return halOsLabelSelector + "," + labelSelector;
     }
 
+    public Capability capability(final String id) {
+        for (Capability capability : capabilities) {
+            if (id.equals(capability.id())) {
+                return capability;
+            }
+        }
+        return null;
+    }
+
     public List<Capability> capabilities() {
         return List.copyOf(capabilities);
     }

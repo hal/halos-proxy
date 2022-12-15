@@ -15,6 +15,7 @@
  */
 package org.wildfly.halos.proxy.wildfly;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -43,7 +44,7 @@ import io.fabric8.openshift.client.OpenShiftClient;
 import io.quarkus.logging.Log;
 import io.quarkus.runtime.LaunchMode;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.unchecked.Unchecked;
+import io.smallrye.mutiny.tuples.Tuple2;
 
 import com.google.common.net.HostAndPort;
 
@@ -57,7 +58,6 @@ import static org.wildfly.halos.proxy.wildfly.dmr.ModelDescriptionConstants.DEPL
 import static org.wildfly.halos.proxy.wildfly.dmr.ModelDescriptionConstants.DISABLED_TIME;
 import static org.wildfly.halos.proxy.wildfly.dmr.ModelDescriptionConstants.ENABLED;
 import static org.wildfly.halos.proxy.wildfly.dmr.ModelDescriptionConstants.ENABLED_TIME;
-import static org.wildfly.halos.proxy.wildfly.dmr.ModelDescriptionConstants.FAILURE_DESCRIPTION;
 import static org.wildfly.halos.proxy.wildfly.dmr.ModelDescriptionConstants.INCLUDE_RUNTIME;
 import static org.wildfly.halos.proxy.wildfly.dmr.ModelDescriptionConstants.MANAGEMENT_MAJOR_VERSION;
 import static org.wildfly.halos.proxy.wildfly.dmr.ModelDescriptionConstants.MANAGEMENT_MICRO_VERSION;
@@ -77,7 +77,7 @@ import static org.wildfly.halos.proxy.wildfly.dmr.ModelDescriptionConstants.SUSP
 import static org.wildfly.halos.proxy.wildfly.dmr.ModelDescriptionConstants.UUID;
 
 @ApplicationScoped
-public class ManagementInterface {
+class ManagementInterface {
 
     private static final int MANAGEMENT_PORT = 9990;
     private static final String REMOTE_HTTP = "remote+http";
@@ -88,15 +88,13 @@ public class ManagementInterface {
     @Inject
     LaunchMode launchMode;
 
-    Uni<WildFlyServer> connect(final ManagedService managedService) {
-        // TODO Refactor blocking code!
-        try {
+    Uni<Tuple2<ModelControllerClient, WildFlyServer>> connect(final ManagedService managedService) {
+        return Uni.createFrom().item(() -> {
             HostAndPort hostAndPort = hostAndPort(managedService);
             ModelControllerClient client = connect(managedService, hostAndPort);
-            return readServerAndDeployments(managedService, client);
-        } catch (Exception e) {
-            return Uni.createFrom().failure(e);
-        }
+            WildFlyServer server = readServerAndDeployments(managedService, client);
+            return Tuple2.of(client, server);
+        });
     }
 
     private HostAndPort hostAndPort(final ManagedService managedService) {
@@ -123,53 +121,56 @@ public class ManagementInterface {
                 }
             }
         } else {
-            throw new WildFlyException(String.format("Unable to get host and port for %s. Service %s is unavailable",
-                    managedService, managedService.name()));
+            throw new ManagementInterfaceException(String.format(
+                    "Unable to get host and port for %s. Service %s is unavailable", managedService, managedService.name()));
         }
-        throw new WildFlyException("Unable to get host and port for " + managedService);
+        throw new ManagementInterfaceException(String.format("Unable to get host and port for %s", managedService));
     }
 
     private ModelControllerClient connect(final ManagedService managedService, final HostAndPort hostAndPort) {
-        return ModelControllerClient.Factory.create(REMOTE_HTTP, hostAndPort.getHost(), hostAndPort.getPort(), callbacks -> {
-            for (Callback current : callbacks) {
-                if (current instanceof NameCallback ncb) {
-                    ncb.setName("admin");
-                } else if (current instanceof PasswordCallback pcb) {
-                    pcb.setPassword("admin".toCharArray());
-                } else if (current instanceof RealmCallback rcb) {
-                    rcb.setText(rcb.getDefaultText());
-                } else {
-                    throw new UnsupportedCallbackException(current);
-                }
-            }
-        });
+        try {
+            return ModelControllerClient.Factory.create(REMOTE_HTTP, hostAndPort.getHost(), hostAndPort.getPort(),
+                    callbacks -> {
+                        for (Callback current : callbacks) {
+                            if (current instanceof NameCallback ncb) {
+                                ncb.setName("admin");
+                            } else if (current instanceof PasswordCallback pcb) {
+                                pcb.setPassword("admin".toCharArray());
+                            } else if (current instanceof RealmCallback rcb) {
+                                rcb.setText(rcb.getDefaultText());
+                            } else {
+                                throw new UnsupportedCallbackException(current);
+                            }
+                        }
+                    });
+        } catch (Exception e) {
+            throw new ManagementInterfaceException(
+                    String.format("Unable to connect to %s using %s", managedService, hostAndPort));
+        }
     }
 
-    private Uni<WildFlyServer> readServerAndDeployments(final ManagedService managedService,
-            final ModelControllerClient client) {
+    private WildFlyServer readServerAndDeployments(final ManagedService managedService, final ModelControllerClient client) {
         Operation rootOperation = new Operation.Builder(ResourceAddress.root(), READ_RESOURCE_OPERATION)
                 .param(ATTRIBUTES_ONLY, true).param(INCLUDE_RUNTIME, true).build();
         Operation deploymentsOperation = new Operation.Builder(ResourceAddress.root(), READ_CHILDREN_RESOURCES_OPERATION)
                 .param(CHILD_TYPE, DEPLOYMENT).param(INCLUDE_RUNTIME, true).param(RECURSIVE, false).build();
         Composite composite = new Composite(rootOperation, deploymentsOperation);
-        return Uni.createFrom().future(client.executeAsync(composite)).onFailure().recoverWithItem(throwable -> {
-            ModelNode modelNode = new ModelNode().get(FAILURE_DESCRIPTION).set(throwable.getMessage());
-            return modelNode;
-        }).onItem().transform(Unchecked.function(payload -> {
+        try {
+            ModelNode payload = client.execute(composite);
             CompositeResult compositeResult = new CompositeResult(payload.get(RESULT));
             if (compositeResult.isFailure()) {
-                throw new WildFlyException(String.format("Operation %s failed for %s", composite.asCli(), managedService));
+                throw new ManagementInterfaceException(
+                        String.format("Operation %s failed for %s", composite.asCli(), managedService));
             } else if (composite.isEmpty()) {
-                throw new WildFlyException(
+                throw new ManagementInterfaceException(
                         String.format("Operation %s for %s returned an empty result!" + composite.asCli(), managedService));
             } else {
                 ModelNode rootNode = compositeResult.step(0).get(RESULT);
                 String serverId = rootNode.get(UUID).asString();
                 String serverName = rootNode.get(NAME).asString();
                 String productName = rootNode.get(PRODUCT_NAME).asString();
-                Version productVersion = parseVersion(managedService, PRODUCT_VERSION,
-                        rootNode.get(PRODUCT_VERSION).asString());
-                Version coreVersion = parseVersion(managedService, RELEASE_VERSION, rootNode.get(RELEASE_VERSION).asString());
+                Version productVersion = parseVersion(managedService, PRODUCT_VERSION, rootNode.get(PRODUCT_VERSION));
+                Version coreVersion = parseVersion(managedService, RELEASE_VERSION, rootNode.get(RELEASE_VERSION));
                 Version managementVersion = parseManagementVersion(rootNode);
                 RunningMode runningMode = ModelNodeHelper.asEnumValue(rootNode, RUNNING_MODE, RunningMode::valueOf,
                         RunningMode.UNDEFINED);
@@ -192,18 +193,25 @@ public class ManagementInterface {
                 return new WildFlyServer(managedService, serverId, serverName, productName, productVersion, coreVersion,
                         managementVersion, runningMode, serverState, suspendState, deployments);
             }
-        }));
+        } catch (IOException e) {
+            throw new ManagementInterfaceException(
+                    String.format("Operation %s failed for %s: %s", composite.asCli(), managedService, e.getMessage()));
+        }
     }
 
-    private Version parseVersion(final ManagedService managedService, final String field, final String version) {
-        String safeVersion = version.replace(".Final", "");
-        try {
-            return Version.parseVersion(safeVersion);
-        } catch (Exception e) {
-            Log.errorf("Unable to parse %s as version for %s, field %s: %s", safeVersion, managedService, field,
-                    e.getMessage());
-            return Version.ZERO;
+    private Version parseVersion(final ManagedService managedService, final String field, final ModelNode version) {
+        Version result = Version.ZERO;
+        if (version.isDefined()) {
+            String versionValue = version.asString();
+            String safeVersion = versionValue.replace(".Final", "");
+            try {
+                result = Version.parseVersion(safeVersion);
+            } catch (Exception e) {
+                Log.errorf("Unable to parse %s as version for %s, field %s: %s", safeVersion, managedService, field,
+                        e.getMessage());
+            }
         }
+        return result;
     }
 
     private Version parseManagementVersion(final ModelNode modelNode) {
