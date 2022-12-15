@@ -13,15 +13,10 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.wildfly.halos.proxy.wildfly;
+package org.wildfly.halos.proxy;
 
-import java.util.Set;
+public interface Constants {
 
-import org.wildfly.halos.proxy.ManagedService;
-
-import de.skuzzle.semantic.Version;
-
-public record Server(ManagedService service, String id, String serverName, String productName, Version productVersion,
-        Version coreVersion, Version managementVersion, RunningMode runningMode, ServerState serverState,
-        SuspendState suspendState, Set<Deployment> deployments) {
+    int HTTP_PORT = 80;
+    int HTTPS_PORT = 443;
 }

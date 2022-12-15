@@ -15,14 +15,23 @@
  */
 package org.wildfly.halos.proxy;
 
-import io.smallrye.mutiny.Uni;
+import java.util.Collection;
 
-public interface Capability {
-    String id();
+import javax.inject.Inject;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 
-    String title();
+@Path("/api/v1/capabilities")
+@Produces(MediaType.APPLICATION_JSON)
+public class CapabilityResource {
 
-    Uni<ManagedService.Status> connect(ManagedService managedService);
+    @Inject
+    Capabilities capabilities;
 
-    Uni<Void> close(ManagedService managedService);
+    @GET
+    public Collection<Capability> capabilities() {
+        return capabilities.capabilities();
+    }
 }

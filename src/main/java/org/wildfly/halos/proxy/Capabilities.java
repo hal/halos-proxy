@@ -62,7 +62,7 @@ public class Capabilities {
             if (value.isPresent() && value.get().length() != 0) {
                 labelSelectors.put(capability, halOsAnd(value.get()));
             } else {
-                Log.errorf(
+                Log.warnf(
                         "No label selector configured for capability %s. No services will be discovered for that capability! Please configure a label selector using the key '%s%s%s'",
                         capability, CAPABILITY_LABELS_PREFIX, capability.id(), CAPABILITY_LABELS_SUFFIX);
             }
@@ -71,6 +71,10 @@ public class Capabilities {
 
     private String halOsAnd(final String labelSelector) {
         return halOsLabelSelector + "," + labelSelector;
+    }
+
+    public List<Capability> capabilities() {
+        return List.copyOf(capabilities);
     }
 
     public Map<Capability, String> labelSelectors() {

@@ -98,14 +98,19 @@ public class ManagedServiceRepository {
         services.put(managedService.id(), managedService);
         publishModification(new ManagedServiceModification(modification, managedService));
 
-        final ManagedService fms = managedService;
+        // connect capability
+        final ManagedService finalManagedService = managedService;
         capability.connect(managedService).subscribe().with(status -> {
-            ManagedService ums = fms.withStatus(status);
-            publishModification(new ManagedServiceModification(Modification.UPDATE, ums));
+            // ok
+            ManagedService connectedManagedService = finalManagedService.withStatus(status);
+            services.put(connectedManagedService.id(), connectedManagedService);
+            publishModification(new ManagedServiceModification(Modification.UPDATE, connectedManagedService));
+            Log.infof("Open %s for %s", capability, connectedManagedService);
         }, throwable -> {
-            Log.errorf("Error connecting %s for %s: %s", fms, capability, throwable.getMessage());
-            ManagedService ums = fms.withStatus(ManagedService.Status.FAILED);
+            // failed
+            ManagedService ums = finalManagedService.withStatus(ManagedService.Status.FAILED);
             publishModification(new ManagedServiceModification(Modification.UPDATE, ums));
+            Log.errorf("Error connecting %s and %s: %s", finalManagedService, capability, throwable.getMessage());
         });
     }
 
@@ -113,26 +118,21 @@ public class ManagedServiceRepository {
         ManagedService managedService = services.remove(service.getMetadata().getUid());
         if (managedService != null) {
             publishModification(new ManagedServiceModification(Modification.DELETE, managedService));
+            for (Capability capability : managedService.capabilities()) {
+                capability.close(managedService).subscribe()
+                        .with(unused -> Log.infof("Close %s for %s", capability, managedService), throwable -> Log
+                                .errorf("Error closing %s for %s: %s", capability, managedService, throwable.getMessage()));
+            }
         }
     }
 
     private void publishModification(final ManagedServiceModification msm) {
         processor.onNext(msm);
-        String modificationName = msm.modification().name().toLowerCase();
-        Log.infof("%s%s %s", modificationName.substring(0, 1).toUpperCase(), modificationName.substring(1),
-                msm.managedService());
+        String modificationName = msm.modification().name().charAt(0) + msm.modification().name().toLowerCase().substring(1);
+        Log.infof("%s %s", modificationName, msm.managedService());
     }
 
     // ------------------------------------------------------ properties
-
-    public ManagedService managedServiceByName(final String name) {
-        for (ManagedService managedService : services.values()) {
-            if (name.equals(managedService.name())) {
-                return managedService;
-            }
-        }
-        return null;
-    }
 
     public Set<ManagedService> managedServices() {
         return Set.copyOf(services.values());

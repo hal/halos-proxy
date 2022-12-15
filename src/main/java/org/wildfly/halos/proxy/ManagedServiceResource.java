@@ -15,7 +15,7 @@
  */
 package org.wildfly.halos.proxy;
 
-import java.util.Set;
+import java.util.Collection;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -27,7 +27,7 @@ import org.jboss.resteasy.reactive.RestStreamElementType;
 
 import io.smallrye.mutiny.Multi;
 
-@Path("/api/v1/service")
+@Path("/api/v1/services")
 @Produces(MediaType.APPLICATION_JSON)
 public class ManagedServiceResource {
 
@@ -35,7 +35,7 @@ public class ManagedServiceResource {
     ManagedServiceRepository repository;
 
     @GET
-    public Set<ManagedService> servers() {
+    public Collection<ManagedService> services() {
         return repository.managedServices();
     }
 

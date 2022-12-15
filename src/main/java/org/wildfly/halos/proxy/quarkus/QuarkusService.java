@@ -13,16 +13,13 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.wildfly.halos.proxy;
+package org.wildfly.halos.proxy.quarkus;
 
-import io.smallrye.mutiny.Uni;
+import java.util.List;
 
-public interface Capability {
-    String id();
+import org.wildfly.halos.proxy.ManagedService;
 
-    String title();
+import com.google.common.net.HostAndPort;
 
-    Uni<ManagedService.Status> connect(ManagedService managedService);
-
-    Uni<Void> close(ManagedService managedService);
+public record QuarkusService(ManagedService managedService, List<HostAndPort> routes) {
 }

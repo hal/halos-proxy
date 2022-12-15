@@ -38,9 +38,20 @@ public class WildFlyCapability implements Capability {
     }
 
     @Override
+    public String title() {
+        return "WildFly";
+    }
+
+    @Override
     public Uni<ManagedService.Status> connect(final ManagedService managedService) {
         Log.warnf("connect is not yet implemented for %s", this);
         return Uni.createFrom().item(managedService.status());
+    }
+
+    @Override
+    public Uni<Void> close(final ManagedService managedService) {
+        Log.warnf("connect is not yet implemented for %s", this);
+        return Uni.createFrom().voidItem();
     }
 
     @Override

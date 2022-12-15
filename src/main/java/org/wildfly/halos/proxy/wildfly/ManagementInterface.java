@@ -49,6 +49,8 @@ import com.google.common.net.HostAndPort;
 
 import de.skuzzle.semantic.Version;
 
+import static org.wildfly.halos.proxy.Constants.HTTPS_PORT;
+import static org.wildfly.halos.proxy.Constants.HTTP_PORT;
 import static org.wildfly.halos.proxy.wildfly.dmr.ModelDescriptionConstants.ATTRIBUTES_ONLY;
 import static org.wildfly.halos.proxy.wildfly.dmr.ModelDescriptionConstants.CHILD_TYPE;
 import static org.wildfly.halos.proxy.wildfly.dmr.ModelDescriptionConstants.DEPLOYMENT;
@@ -77,8 +79,6 @@ import static org.wildfly.halos.proxy.wildfly.dmr.ModelDescriptionConstants.UUID
 @ApplicationScoped
 public class ManagementInterface {
 
-    private static final int HTTP_PORT = 80;
-    private static final int HTTPS_PORT = 443;
     private static final int MANAGEMENT_PORT = 9990;
     private static final String REMOTE_HTTP = "remote+http";
 
@@ -88,7 +88,7 @@ public class ManagementInterface {
     @Inject
     LaunchMode launchMode;
 
-    Uni<Server> connect(final ManagedService managedService) {
+    Uni<WildFlyServer> connect(final ManagedService managedService) {
         // TODO Refactor blocking code!
         try {
             HostAndPort hostAndPort = hostAndPort(managedService);
@@ -145,7 +145,8 @@ public class ManagementInterface {
         });
     }
 
-    private Uni<Server> readServerAndDeployments(final ManagedService managedService, final ModelControllerClient client) {
+    private Uni<WildFlyServer> readServerAndDeployments(final ManagedService managedService,
+            final ModelControllerClient client) {
         Operation rootOperation = new Operation.Builder(ResourceAddress.root(), READ_RESOURCE_OPERATION)
                 .param(ATTRIBUTES_ONLY, true).param(INCLUDE_RUNTIME, true).build();
         Operation deploymentsOperation = new Operation.Builder(ResourceAddress.root(), READ_CHILDREN_RESOURCES_OPERATION)
@@ -188,7 +189,7 @@ public class ManagementInterface {
                             ModelNodeHelper.failSafeLocalDateTime(deploymentNode, DISABLED_TIME));
                 }).collect(Collectors.toSet());
 
-                return new Server(managedService, serverId, serverName, productName, productVersion, coreVersion,
+                return new WildFlyServer(managedService, serverId, serverName, productName, productVersion, coreVersion,
                         managementVersion, runningMode, serverState, suspendState, deployments);
             }
         }));

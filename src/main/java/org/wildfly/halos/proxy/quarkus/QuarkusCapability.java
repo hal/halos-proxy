@@ -15,18 +15,35 @@
  */
 package org.wildfly.halos.proxy.quarkus;
 
+import java.util.List;
+
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
 import org.wildfly.halos.proxy.Capability;
 import org.wildfly.halos.proxy.ManagedService;
 
+import io.fabric8.kubernetes.api.model.Service;
+import io.fabric8.openshift.client.OpenShiftClient;
 import io.quarkus.logging.Log;
 import io.smallrye.mutiny.Uni;
+
+import com.google.common.net.HostAndPort;
+
+import static java.util.stream.Collectors.toList;
+import static org.wildfly.halos.proxy.Constants.HTTPS_PORT;
+import static org.wildfly.halos.proxy.Constants.HTTP_PORT;
 
 @ApplicationScoped
 public class QuarkusCapability implements Capability {
 
     public static final String ID = "quarkus";
+
+    @Inject
+    OpenShiftClient oc;
+
+    @Inject
+    QuarkusServiceRepository repository;
 
     @Override
     public String id() {
@@ -34,13 +51,43 @@ public class QuarkusCapability implements Capability {
     }
 
     @Override
+    public String title() {
+        return "Quarkus";
+    }
+
+    @Override
     public Uni<ManagedService.Status> connect(final ManagedService managedService) {
+        List<Service> services = oc.services().withField("metadata.id", managedService.id()).list().getItems();
+        if (services.isEmpty()) {
+            Log.errorf("No service found for %s and %s", managedService, this);
+            return Uni.createFrom().item(ManagedService.Status.FAILED);
+        } else if (services.size() > 1) {
+            Log.errorf("More than one service found for %s and %s", managedService, this);
+            return Uni.createFrom().item(ManagedService.Status.FAILED);
+        } else {
+            Service service = services.get(0);
+            List<HostAndPort> hostAndPorts = routes(service);
+            QuarkusService quarkusService = new QuarkusService(managedService, hostAndPorts);
+            repository.add(quarkusService);
+            return Uni.createFrom().item(ManagedService.Status.CONNECTED);
+        }
+    }
+
+    @Override
+    public Uni<Void> close(final ManagedService managedService) {
         Log.warnf("connect is not yet implemented for %s", this);
-        return Uni.createFrom().item(managedService.status());
+        return Uni.createFrom().voidItem();
     }
 
     @Override
     public String toString() {
         return String.format("Capability[%s]", id());
+    }
+
+    private List<HostAndPort> routes(final Service service) {
+        return oc.routes().withField("spec.to.name", service.getMetadata().getName()).list().getItems().stream()
+                .map(route -> HostAndPort.fromParts(route.getSpec().getHost(),
+                        route.getSpec().getTls() != null ? HTTPS_PORT : HTTP_PORT))
+                .collect(toList());
     }
 }
