@@ -28,14 +28,14 @@ import io.quarkus.logging.Log;
 @ApplicationScoped
 class QuarkusServiceRepository {
 
-    private final Map<ManagedService, QuarkusService> services;
+    private final Map<String, QuarkusService> services;
 
     QuarkusServiceRepository() {
         services = new ConcurrentHashMap<>();
     }
 
     void add(final QuarkusService quarkusService) {
-        services.put(quarkusService.managedService(), quarkusService);
+        services.put(quarkusService.managedService().id(), quarkusService);
         Log.infof("Add %s", quarkusService);
     }
 

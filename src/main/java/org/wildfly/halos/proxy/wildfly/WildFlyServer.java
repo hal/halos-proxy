@@ -24,4 +24,9 @@ import de.skuzzle.semantic.Version;
 public record WildFlyServer(ManagedService managedService, String id, String serverName, String productName,
         Version productVersion, Version coreVersion, Version managementVersion, RunningMode runningMode,
         ServerState serverState, SuspendState suspendState, Set<Deployment> deployments) {
+
+    public WildFlyServer withManagedService(ManagedService managedService) {
+        return new WildFlyServer(managedService, id(), serverName(), productName(), productVersion(), coreVersion(),
+                managementVersion(), runningMode(), serverState(), suspendState(), deployments());
+    }
 }

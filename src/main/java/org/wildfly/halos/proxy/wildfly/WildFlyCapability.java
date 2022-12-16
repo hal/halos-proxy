@@ -20,6 +20,7 @@ import java.time.Duration;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import org.jboss.as.controller.client.ModelControllerClient;
 import org.wildfly.halos.proxy.Capability;
 import org.wildfly.halos.proxy.ManagedService;
 
@@ -56,8 +57,10 @@ public class WildFlyCapability implements Capability {
                 .withBackOff(Duration.ofMillis(INITIAL_BACK_OFF), Duration.ofMillis(MAX_BACK_OFF)).expireIn(EXPIRE_IN).onItem()
                 .transform(tuple -> {
                     ManagedService connectedManagedService = managedService.withStatus(ManagedService.Status.CONNECTED);
+                    ModelControllerClient client = tuple.getItem1();
+                    WildFlyServer wildFlyServer = tuple.getItem2().withManagedService(connectedManagedService);
                     Log.infof("Successfully connected to %s", connectedManagedService);
-                    wildFlyServerRepository.add(connectedManagedService, tuple.getItem1(), tuple.getItem2());
+                    wildFlyServerRepository.add(client, wildFlyServer);
                     return connectedManagedService;
                 }).onFailure().recoverWithItem(throwable -> {
                     ManagedService failedManagedStatus = managedService.withStatus(ManagedService.Status.FAILED);

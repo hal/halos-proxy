@@ -29,24 +29,23 @@ import io.quarkus.logging.Log;
 @ApplicationScoped
 class WildFlyServerRepository {
 
-    private final Map<ManagedService, WildFlyServer> servers;
-    private final Map<ManagedService, ModelControllerClient> clients;
+    private final Map<String, WildFlyServer> servers;
+    private final Map<String, ModelControllerClient> clients;
 
     WildFlyServerRepository() {
         servers = new ConcurrentHashMap<>();
         clients = new ConcurrentHashMap<>();
     }
 
-    void add(final ManagedService managedService, final ModelControllerClient modelControllerClient,
-            final WildFlyServer wildFlyServer) {
-        clients.put(managedService, modelControllerClient);
-        servers.put(managedService, wildFlyServer);
+    void add(final ModelControllerClient modelControllerClient, final WildFlyServer wildFlyServer) {
+        clients.put(wildFlyServer.managedService().id(), modelControllerClient);
+        servers.put(wildFlyServer.managedService().id(), wildFlyServer);
         Log.infof("Add %s", wildFlyServer);
     }
 
     void delete(final ManagedService managedService) {
-        WildFlyServer removedServer = servers.remove(managedService);
-        ModelControllerClient removedClient = clients.remove(managedService);
+        WildFlyServer removedServer = servers.remove(managedService.id());
+        ModelControllerClient removedClient = clients.remove(managedService.id());
         if (removedServer != null && removedClient != null) {
             Log.infof("Remove %s", removedServer);
         }
