@@ -37,3 +37,4 @@ release.properties
 # Misc
 lsp
 .cache
+.env

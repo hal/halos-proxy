@@ -32,4 +32,4 @@ jobs:
           password: ${{ secrets.QUAY_ROBOT_TOKEN }}
       - name: Container
         id: container
-        run: $MVN package -Dquarkus.container-image.build=true -Dquarkus.container-image.image=quay.io/halconsole/halos:latest -Dquarkus.container-image.push=true '-Dquarkus.jib.labels."org.opencontainers.image.revision"='$GITHUB_SHA
+        run: $MVN package -Dquarkus.container-image.build=true -Dquarkus.container-image.image=quay.io/halconsole/halos:latest -Dquarkus.container-image.registry=quay.io -Dquarkus.container-image.push=true '-Dquarkus.jib.labels."org.opencontainers.image.revision"='$GITHUB_SHA
