@@ -26,8 +26,7 @@ import javax.ws.rs.core.Response.Status;
 @Path("/api/v1/wildfly/operation")
 public class OperationResource {
 
-    @Inject
-    WildFlyServerRepository repository;
+    @Inject WildFlyServerRepository repository;
 
     //
     // @POST

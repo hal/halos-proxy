@@ -15,6 +15,7 @@
  */
 package org.wildfly.halos.proxy.wildfly;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -40,14 +41,15 @@ class WildFlyServerRepository {
     void add(final ModelControllerClient modelControllerClient, final WildFlyServer wildFlyServer) {
         clients.put(wildFlyServer.managedService().id(), modelControllerClient);
         servers.put(wildFlyServer.managedService().id(), wildFlyServer);
-        Log.infof("Add %s", wildFlyServer);
     }
 
-    void delete(final ManagedService managedService) {
-        WildFlyServer removedServer = servers.remove(managedService.id());
-        ModelControllerClient removedClient = clients.remove(managedService.id());
-        if (removedServer != null && removedClient != null) {
-            Log.infof("Remove %s", removedServer);
+    void remove(final ManagedService managedService) {
+        servers.remove(managedService.id());
+        ModelControllerClient client = clients.remove(managedService.id());
+        try {
+            client.close();
+        } catch (IOException e) {
+            Log.errorf("Error closing client for managed service %s: %s", managedService.name(), e.getMessage());
         }
     }
 

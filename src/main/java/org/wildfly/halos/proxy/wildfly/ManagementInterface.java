@@ -82,11 +82,9 @@ class ManagementInterface {
     private static final int MANAGEMENT_PORT = 9990;
     private static final String REMOTE_HTTP = "remote+http";
 
-    @Inject
-    OpenShiftClient oc;
+    @Inject OpenShiftClient oc;
 
-    @Inject
-    LaunchMode launchMode;
+    @Inject LaunchMode launchMode;
 
     Uni<Tuple2<ModelControllerClient, WildFlyServer>> connect(final ManagedService managedService) {
         return Uni.createFrom().item(() -> {
@@ -207,8 +205,8 @@ class ManagementInterface {
             try {
                 result = Version.parseVersion(safeVersion);
             } catch (Exception e) {
-                Log.errorf("Unable to parse %s as version for %s, field %s: %s", safeVersion, managedService, field,
-                        e.getMessage());
+                Log.errorf("Unable to parse attribute %s with value %s as version for managed service %s: %s", field,
+                        safeVersion, managedService.name(), e.getMessage());
             }
         }
         return result;

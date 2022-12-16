@@ -15,14 +15,9 @@
  */
 package org.wildfly.halos.proxy;
 
-import io.smallrye.mutiny.Uni;
-
 public interface Capability {
+
     String id();
 
     String title();
-
-    Uni<ManagedService> connect(ManagedService managedService);
-
-    void close(ManagedService managedService);
 }

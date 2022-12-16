@@ -31,8 +31,7 @@ import io.smallrye.mutiny.Multi;
 @Produces(MediaType.APPLICATION_JSON)
 public class ManagedServiceResource {
 
-    @Inject
-    ManagedServiceRepository repository;
+    @Inject ManagedServiceRepository repository;
 
     @GET
     public Collection<ManagedService> services() {

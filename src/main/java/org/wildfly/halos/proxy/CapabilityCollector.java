@@ -13,24 +13,17 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.wildfly.halos.proxy.quarkus;
+package org.wildfly.halos.proxy;
 
-import java.util.Collection;
+import io.smallrye.mutiny.Uni;
 
-import javax.inject.Inject;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
+public interface CapabilityCollector {
 
-@Path("/api/v1/quarkus/services")
-@Produces(MediaType.APPLICATION_JSON)
-public class QuarkusServiceResource {
+    Capability capability();
 
-    @Inject QuarkusServiceRepository repository;
+    String labelSelector();
 
-    @GET
-    public Collection<QuarkusService> services() {
-        return repository.quarkusServices();
-    }
+    Uni<ManagedService> connect(ManagedService managedService);
+
+    void close(ManagedService managedService);
 }

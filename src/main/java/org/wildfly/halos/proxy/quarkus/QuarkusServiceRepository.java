@@ -23,8 +23,6 @@ import javax.enterprise.context.ApplicationScoped;
 
 import org.wildfly.halos.proxy.ManagedService;
 
-import io.quarkus.logging.Log;
-
 @ApplicationScoped
 class QuarkusServiceRepository {
 
@@ -36,14 +34,10 @@ class QuarkusServiceRepository {
 
     void add(final QuarkusService quarkusService) {
         services.put(quarkusService.managedService().id(), quarkusService);
-        Log.infof("Add %s", quarkusService);
     }
 
-    void delete(final ManagedService managedService) {
-        QuarkusService removedService = services.remove(managedService);
-        if (removedService != null) {
-            Log.infof("Remove %s", removedService);
-        }
+    void remove(final ManagedService managedService) {
+        services.remove(managedService.id());
     }
 
     Set<QuarkusService> quarkusServices() {

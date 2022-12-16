@@ -27,8 +27,7 @@ import javax.ws.rs.core.MediaType;
 @Produces(MediaType.APPLICATION_JSON)
 public class WildFlyServerResource {
 
-    @Inject
-    WildFlyServerRepository repository;
+    @Inject WildFlyServerRepository repository;
 
     @GET
     public Collection<WildFlyServer> servers() {

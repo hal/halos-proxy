@@ -27,11 +27,10 @@ import javax.ws.rs.core.MediaType;
 @Produces(MediaType.APPLICATION_JSON)
 public class CapabilityResource {
 
-    @Inject
-    Capabilities capabilities;
+    @Inject CapabilityRepository repository;
 
     @GET
     public Collection<Capability> capabilities() {
-        return capabilities.capabilities();
+        return repository.capabilities();
     }
 }
