@@ -1,0 +1,35 @@
+name: Build Container
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  verify:
+    name: Build Container
+    runs-on: ubuntu-latest
+    env:
+      MVN: ./mvnw --show-version --batch-mode
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v3
+      - name: Set up JDK
+        id: setup-jdk
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: temurin
+          cache: maven
+      - name: Login to Quay.io
+        id: login-to-quay-io
+        uses: docker/login-action@v2
+        with:
+          registry: quay.io
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_ROBOT_TOKEN }}
+      - name: Container
+        id: container
+        run: $MVN package -Dquarkus.container-image.build=true -Dquarkus.container-image.image=quay.io/halconsole/halos:latest -Dquarkus.container-image.push=true '-Dquarkus.jib.labels."org.opencontainers.image.revision"='$GITHUB_SHA
