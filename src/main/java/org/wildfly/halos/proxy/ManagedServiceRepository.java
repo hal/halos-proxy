@@ -90,6 +90,19 @@ public class ManagedServiceRepository {
         return halOsLabelSelector + "," + labelSelector;
     }
 
+    // ------------------------------------------------------ connect
+
+    void connect(final ManagedService managedService, final CapabilityCollector collector) {
+        collector.connect(managedService).subscribe().with(connectedManagedService -> {
+            services.put(connectedManagedService.id(), connectedManagedService);
+            publishModification(new ManagedServiceModification(Modification.UPDATE, connectedManagedService));
+        }, throwable -> {
+            ManagedService failed = managedService.copy(ManagedService.Status.FAILED);
+            services.put(failed.id(), failed);
+            publishModification(new ManagedServiceModification(Modification.UPDATE, failed));
+        });
+    }
+
     // ------------------------------------------------------ add, delete
 
     private void add(final Service service, final CapabilityCollector collector) {
@@ -105,17 +118,6 @@ public class ManagedServiceRepository {
         services.put(managedService.id(), managedService);
         publishModification(new ManagedServiceModification(modification, managedService));
         connect(managedService, collector);
-    }
-
-    private void connect(final ManagedService managedService, final CapabilityCollector collector) {
-        collector.connect(managedService).subscribe().with(connectedManagedService -> {
-            services.put(connectedManagedService.id(), connectedManagedService);
-            publishModification(new ManagedServiceModification(Modification.UPDATE, connectedManagedService));
-        }, throwable -> {
-            ManagedService failed = managedService.copy(ManagedService.Status.FAILED);
-            services.put(failed.id(), failed);
-            publishModification(new ManagedServiceModification(Modification.UPDATE, failed));
-        });
     }
 
     private void delete(final Service service, final CapabilityCollector collector) {
@@ -134,7 +136,11 @@ public class ManagedServiceRepository {
 
     // ------------------------------------------------------ properties
 
-    public Set<ManagedService> managedServices() {
+    ManagedService managedService(final String id) {
+        return services.get(id);
+    }
+
+    Set<ManagedService> managedServices() {
         return Set.copyOf(services.values());
     }
 

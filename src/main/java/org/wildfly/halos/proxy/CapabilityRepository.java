@@ -35,6 +35,15 @@ public class CapabilityRepository {
         return List.copyOf(collectors);
     }
 
+    CapabilityCollector collector(final String id) {
+        for (CapabilityCollector collector : collectors) {
+            if (id.equals(collector.capability().id())) {
+                return collector;
+            }
+        }
+        return null;
+    }
+
     Set<Capability> capabilities() {
         return collectors.stream().map(CapabilityCollector::capability).collect(toSet());
     }

@@ -19,9 +19,12 @@ import java.util.Collection;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.jboss.resteasy.reactive.RestStreamElementType;
 
@@ -31,18 +34,37 @@ import io.smallrye.mutiny.Multi;
 @Produces(MediaType.APPLICATION_JSON)
 public class ManagedServiceResource {
 
-    @Inject ManagedServiceRepository repository;
+    @Inject ManagedServiceRepository managedServiceRepository;
+    @Inject CapabilityRepository capabilityRepository;
 
     @GET
     public Collection<ManagedService> services() {
-        return repository.managedServices();
+        return managedServiceRepository.managedServices();
     }
 
     @GET
-    @Path("/subscribe")
+    @Path("/modifications")
     @Produces(MediaType.SERVER_SENT_EVENTS)
     @RestStreamElementType(MediaType.APPLICATION_JSON)
     public Multi<ManagedServiceModification> modifications() {
-        return repository.modifications();
+        return managedServiceRepository.modifications();
+    }
+
+    @PUT
+    @Path("/connect/{id}/{capability}")
+    public Response connect(@PathParam("id") final String managedServiceId,
+            @PathParam("capability") final String capabilityId) {
+        ManagedService managedService = managedServiceRepository.managedService(managedServiceId);
+        CapabilityCollector capabilityCollector = capabilityRepository.collector(capabilityId);
+        if (managedService != null && capabilityCollector != null) {
+            if (managedService.status() != ManagedService.Status.CONNECTED) {
+                managedServiceRepository.connect(managedService, capabilityCollector);
+                return Response.ok().build();
+            } else {
+                return Response.noContent().build();
+            }
+        } else {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
     }
 }
