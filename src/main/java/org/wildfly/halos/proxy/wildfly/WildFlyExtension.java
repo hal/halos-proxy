@@ -20,17 +20,17 @@ import java.time.Duration;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import org.jboss.as.controller.client.ModelControllerClient;
-import org.wildfly.halos.proxy.BaseCapabilityCollector;
+import org.wildfly.halos.proxy.BaseCapabilityExtension;
 import org.wildfly.halos.proxy.Capability;
-import org.wildfly.halos.proxy.CapabilityCollector;
+import org.wildfly.halos.proxy.CapabilityExtension;
+import org.wildfly.halos.proxy.Connection;
 import org.wildfly.halos.proxy.ManagedService;
 
 import io.quarkus.logging.Log;
 import io.smallrye.mutiny.Uni;
 
 @ApplicationScoped
-public class WildFlyCollector extends BaseCapabilityCollector implements CapabilityCollector {
+public class WildFlyExtension extends BaseCapabilityExtension implements CapabilityExtension {
 
     private static final long INITIAL_BACK_OFF = 1_000;
     private static final long MAX_BACK_OFF = 5_000;
@@ -46,23 +46,15 @@ public class WildFlyCollector extends BaseCapabilityCollector implements Capabil
     }
 
     @Override
-    public Uni<ManagedService> connect(final ManagedService managedService) {
+    public Uni<Connection> connect(final ManagedService managedService) {
         return managementInterface.connect(managedService).onFailure().retry()
                 .withBackOff(Duration.ofMillis(INITIAL_BACK_OFF), Duration.ofMillis(MAX_BACK_OFF)).expireIn(EXPIRE_IN).onItem()
                 .transform(tuple -> {
-                    ManagedService connectedManagedService = managedService.copy(ManagedService.Status.CONNECTED);
-                    ModelControllerClient client = tuple.getItem1();
-                    WildFlyServer wildFlyServer = tuple.getItem2().copy(connectedManagedService);
-                    Log.infof("Successfully connected to managed service %s", connectedManagedService.name());
-                    wildFlyServerRepository.add(client, wildFlyServer);
-                    return connectedManagedService;
-                }).onFailure().recoverWithItem(throwable -> {
-                    ManagedService failedManagedService = managedService.copy(ManagedService.Status.FAILED);
-                    Log.errorf("Error connecting to managed service %s: %s", failedManagedService.name(),
-                            throwable.getMessage());
-                    wildFlyServerRepository.remove(failedManagedService);
-                    return failedManagedService;
-                });
+                    wildFlyServerRepository.add(managedService, tuple.getItem1(), tuple.getItem2());
+                    Log.infof("Successfully connected to managed service %s", managedService.name());
+                    return Connection.connected();
+                }).onFailure().recoverWithItem(throwable -> Connection.failed(String
+                        .format("Error connecting to managed service %s: %s", managedService.name(), throwable.getMessage())));
     }
 
     @Override

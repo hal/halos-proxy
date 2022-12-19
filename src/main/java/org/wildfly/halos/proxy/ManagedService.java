@@ -20,24 +20,19 @@ import java.util.Set;
 
 import io.fabric8.kubernetes.api.model.Service;
 
-public record ManagedService(String id, String name, Status status, Set<Capability> capabilities) {
-
-    public enum Status {
-        PENDING, CONNECTED, FAILED
-    }
+public record ManagedService(String name, Connection connection, Set<Capability> capabilities) {
 
     public static ManagedService fromService(final Service service, final Capability capability) {
-        return new ManagedService(service.getMetadata().getUid(), service.getMetadata().getName(),
-                ManagedService.Status.PENDING, Set.of(capability));
+        return new ManagedService(service.getMetadata().getName(), Connection.pending(), Set.of(capability));
     }
 
-    public ManagedService copy(final Status status) {
-        return new ManagedService(id(), name(), status, capabilities());
+    public ManagedService updateStatus(final Connection connection) {
+        return new ManagedService(name(), connection, capabilities());
     }
 
-    public ManagedService copy(final Capability capability) {
+    public ManagedService addCapability(final Capability capability) {
         Set<Capability> capabilities = new HashSet<>(capabilities());
         capabilities.add(capability);
-        return new ManagedService(id(), name(), status(), capabilities);
+        return new ManagedService(name(), connection(), capabilities);
     }
 }

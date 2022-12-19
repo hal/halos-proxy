@@ -26,18 +26,18 @@ import org.wildfly.halos.proxy.ManagedService;
 @ApplicationScoped
 class QuarkusServiceRepository {
 
-    private final Map<String, QuarkusService> services;
+    private final Map<String, QuarkusService> services; // key == managed service name
 
     QuarkusServiceRepository() {
         services = new ConcurrentHashMap<>();
     }
 
-    void add(final QuarkusService quarkusService) {
-        services.put(quarkusService.managedService().id(), quarkusService);
+    void add(final ManagedService managedService, final QuarkusService quarkusService) {
+        services.put(managedService.name(), quarkusService);
     }
 
     void remove(final ManagedService managedService) {
-        services.remove(managedService.id());
+        services.remove(managedService.name());
     }
 
     Set<QuarkusService> quarkusServices() {

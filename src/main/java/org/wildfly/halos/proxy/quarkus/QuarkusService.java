@@ -17,9 +17,7 @@ package org.wildfly.halos.proxy.quarkus;
 
 import java.util.List;
 
-import org.wildfly.halos.proxy.ManagedService;
-
 import com.google.common.net.HostAndPort;
 
-record QuarkusService(ManagedService managedService, List<HostAndPort> routes) {
+public record QuarkusService(String managedService, List<HostAndPort> routes) {
 }

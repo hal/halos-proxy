@@ -13,13 +13,17 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.wildfly.halos.proxy.wildfly;
+package org.wildfly.halos.proxy;
 
-import java.util.Set;
+import io.smallrye.mutiny.Uni;
 
-import de.skuzzle.semantic.Version;
+public interface CapabilityExtension {
 
-public record WildFlyServer(String managedService, String name, String productName, Version productVersion, Version coreVersion,
-        Version managementVersion, RunningMode runningMode, ServerState serverState, SuspendState suspendState,
-        Set<Deployment> deployments) {
+    Capability capability();
+
+    String labelSelector();
+
+    Uni<Connection> connect(ManagedService managedService);
+
+    void close(ManagedService managedService);
 }

@@ -38,18 +38,21 @@ class WildFlyServerRepository {
         clients = new ConcurrentHashMap<>();
     }
 
-    void add(final ModelControllerClient modelControllerClient, final WildFlyServer wildFlyServer) {
-        clients.put(wildFlyServer.managedService().id(), modelControllerClient);
-        servers.put(wildFlyServer.managedService().id(), wildFlyServer);
+    void add(final ManagedService managedService, final ModelControllerClient modelControllerClient,
+            final WildFlyServer wildFlyServer) {
+        clients.put(managedService.name(), modelControllerClient);
+        servers.put(managedService.name(), wildFlyServer);
     }
 
     void remove(final ManagedService managedService) {
-        servers.remove(managedService.id());
-        ModelControllerClient client = clients.remove(managedService.id());
-        try {
-            client.close();
-        } catch (IOException e) {
-            Log.errorf("Error closing client for managed service %s: %s", managedService.name(), e.getMessage());
+        servers.remove(managedService.name());
+        ModelControllerClient client = clients.remove(managedService.name());
+        if (client != null) {
+            try {
+                client.close();
+            } catch (IOException e) {
+                Log.errorf("Error closing client for managed service %s: %s", managedService.name(), e.getMessage());
+            }
         }
     }
 

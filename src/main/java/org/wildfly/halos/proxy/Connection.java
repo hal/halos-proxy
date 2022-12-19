@@ -13,13 +13,25 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.wildfly.halos.proxy.wildfly;
+package org.wildfly.halos.proxy;
 
-import java.util.Set;
+import java.time.LocalDateTime;
 
-import de.skuzzle.semantic.Version;
+public record Connection(Status status, LocalDateTime timestamp, String message) {
 
-public record WildFlyServer(String managedService, String name, String productName, Version productVersion, Version coreVersion,
-        Version managementVersion, RunningMode runningMode, ServerState serverState, SuspendState suspendState,
-        Set<Deployment> deployments) {
+    public enum Status {
+        PENDING, CONNECTED, FAILED
+    }
+
+    public static Connection pending() {
+        return new Connection(Status.PENDING, LocalDateTime.now(), null);
+    }
+
+    public static Connection connected() {
+        return new Connection(Status.CONNECTED, LocalDateTime.now(), null);
+    }
+
+    public static Connection failed(String reason) {
+        return new Connection(Status.FAILED, LocalDateTime.now(), reason);
+    }
 }

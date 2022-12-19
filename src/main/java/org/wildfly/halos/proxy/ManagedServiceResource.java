@@ -42,29 +42,29 @@ public class ManagedServiceResource {
         return managedServiceRepository.managedServices();
     }
 
+    @PUT
+    @Path("/{name}/connect/{capability}")
+    public Response connect(@PathParam("name") final String managedServiceName,
+            @PathParam("capability") final String capability) {
+        ManagedService managedService = managedServiceRepository.managedService(managedServiceName);
+        CapabilityExtension capabilityExtension = capabilityRepository.extension(capability);
+        if (managedService != null && capabilityExtension != null) {
+            if (managedService.connection().status() != Connection.Status.CONNECTED) {
+                managedServiceRepository.connect(managedService, capabilityExtension);
+                return Response.ok().build();
+            } else {
+                return Response.notModified().build();
+            }
+        } else {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+    }
+
     @GET
     @Path("/modifications")
     @Produces(MediaType.SERVER_SENT_EVENTS)
     @RestStreamElementType(MediaType.APPLICATION_JSON)
     public Multi<ManagedServiceModification> modifications() {
         return managedServiceRepository.modifications();
-    }
-
-    @PUT
-    @Path("/connect/{id}/{capability}")
-    public Response connect(@PathParam("id") final String managedServiceId,
-            @PathParam("capability") final String capabilityId) {
-        ManagedService managedService = managedServiceRepository.managedService(managedServiceId);
-        CapabilityCollector capabilityCollector = capabilityRepository.collector(capabilityId);
-        if (managedService != null && capabilityCollector != null) {
-            if (managedService.status() != ManagedService.Status.CONNECTED) {
-                managedServiceRepository.connect(managedService, capabilityCollector);
-                return Response.ok().build();
-            } else {
-                return Response.noContent().build();
-            }
-        } else {
-            return Response.status(Response.Status.NOT_FOUND).build();
-        }
     }
 }

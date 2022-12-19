@@ -24,7 +24,7 @@ import org.eclipse.microprofile.config.Config;
 
 import io.quarkus.logging.Log;
 
-public abstract class BaseCapabilityCollector implements CapabilityCollector {
+public abstract class BaseCapabilityExtension implements CapabilityExtension {
 
     private static final String CAPABILITY_LABELS_PREFIX = "halos.capability.";
     private static final String CAPABILITY_LABELS_SUFFIX = ".label.selector";
@@ -35,14 +35,14 @@ public abstract class BaseCapabilityCollector implements CapabilityCollector {
 
     @PostConstruct
     void validate() {
-        String propertyName = CAPABILITY_LABELS_PREFIX + capability().id() + CAPABILITY_LABELS_SUFFIX;
+        String propertyName = CAPABILITY_LABELS_PREFIX + capability().name() + CAPABILITY_LABELS_SUFFIX;
         Optional<String> value = config.getOptionalValue(propertyName, String.class);
         if (value.isPresent() && value.get().length() != 0) {
             labelSelector = value.get();
         } else {
             Log.warnf(
                     "No label selector configured for capability %s. No services will be discovered for that capability! Please configure a label selector using the key '%s%s%s'",
-                    capability().id(), CAPABILITY_LABELS_PREFIX, capability().id(), CAPABILITY_LABELS_SUFFIX);
+                    capability().name(), CAPABILITY_LABELS_PREFIX, capability().name(), CAPABILITY_LABELS_SUFFIX);
         }
     }
 

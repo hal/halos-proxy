@@ -15,5 +15,5 @@
  */
 package org.wildfly.halos.proxy;
 
-public record ManagedServiceModification(Modification modification, ManagedService managedService) {
+public record ManagedServiceModification(ManagedService managedService, Modification modification) {
 }

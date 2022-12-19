@@ -15,15 +15,9 @@
  */
 package org.wildfly.halos.proxy;
 
-import io.smallrye.mutiny.Uni;
+public class ManagedServiceException extends RuntimeException {
 
-public interface CapabilityCollector {
-
-    Capability capability();
-
-    String labelSelector();
-
-    Uni<ManagedService> connect(ManagedService managedService);
-
-    void close(ManagedService managedService);
+    public ManagedServiceException(final String message) {
+        super(message);
+    }
 }

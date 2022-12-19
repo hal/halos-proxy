@@ -74,7 +74,6 @@ import static org.wildfly.halos.proxy.wildfly.dmr.ModelDescriptionConstants.RUNN
 import static org.wildfly.halos.proxy.wildfly.dmr.ModelDescriptionConstants.SERVER_STATE;
 import static org.wildfly.halos.proxy.wildfly.dmr.ModelDescriptionConstants.STATUS;
 import static org.wildfly.halos.proxy.wildfly.dmr.ModelDescriptionConstants.SUSPEND_STATE;
-import static org.wildfly.halos.proxy.wildfly.dmr.ModelDescriptionConstants.UUID;
 
 @ApplicationScoped
 class ManagementInterface {
@@ -164,7 +163,6 @@ class ManagementInterface {
                         String.format("Operation %s for %s returned an empty result!" + composite.asCli(), managedService));
             } else {
                 ModelNode rootNode = compositeResult.step(0).get(RESULT);
-                String serverId = rootNode.get(UUID).asString();
                 String serverName = rootNode.get(NAME).asString();
                 String productName = rootNode.get(PRODUCT_NAME).asString();
                 Version productVersion = parseVersion(managedService, PRODUCT_VERSION, rootNode.get(PRODUCT_VERSION));
@@ -178,17 +176,17 @@ class ManagementInterface {
                         SuspendState.UNDEFINED);
 
                 Set<Deployment> deployments = compositeResult.step(1).get(RESULT).asPropertyList().stream().map(property -> {
-                    String name = property.getName();
+                    String deploymentName = property.getName();
                     ModelNode deploymentNode = property.getValue();
                     DeploymentStatus status = ModelNodeHelper.asEnumValue(deploymentNode, STATUS, DeploymentStatus::valueOf,
                             DeploymentStatus.UNDEFINED);
                     boolean enabled = deploymentNode.get(ENABLED).asBoolean();
-                    return new Deployment(name, status, enabled,
+                    return new Deployment(deploymentName, status, enabled,
                             ModelNodeHelper.failSafeLocalDateTime(deploymentNode, ENABLED_TIME),
                             ModelNodeHelper.failSafeLocalDateTime(deploymentNode, DISABLED_TIME));
                 }).collect(Collectors.toSet());
 
-                return new WildFlyServer(managedService, serverId, serverName, productName, productVersion, coreVersion,
+                return new WildFlyServer(managedService.name(), serverName, productName, productVersion, coreVersion,
                         managementVersion, runningMode, serverState, suspendState, deployments);
             }
         } catch (IOException e) {

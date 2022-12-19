@@ -60,10 +60,10 @@ public class ManagedServiceRepository {
     }
 
     private void initWatches() {
-        for (CapabilityCollector collector : capabilityRepository.collectors()) {
+        for (CapabilityExtension collector : capabilityRepository.extensions()) {
             Capability capability = collector.capability();
             String labelSelector = halOsAnd(collector.labelSelector());
-            Log.infof("Register service watch for capability %s using label selector %s", capability.id(), labelSelector);
+            Log.infof("Register service watch for capability %s using label selector %s", capability.name(), labelSelector);
             oc.services().withLabelSelector(labelSelector).watch(new Watcher<>() {
                 @Override
                 public void eventReceived(final Action action, final Service service) {
@@ -76,9 +76,9 @@ public class ManagedServiceRepository {
                 @Override
                 public void onClose(final WatcherException e) {
                     if (e != null) {
-                        Log.errorf("Error closing server watch for capability %s: %s", capability.id(), e.getMessage());
+                        Log.errorf("Error closing server watch for capability %s: %s", capability.name(), e.getMessage());
                     } else {
-                        Log.infof("Close service watch for capability %s using label selector %s", capability.id(),
+                        Log.infof("Close service watch for capability %s using label selector %s", capability.name(),
                                 labelSelector);
                     }
                 }
@@ -92,38 +92,40 @@ public class ManagedServiceRepository {
 
     // ------------------------------------------------------ connect
 
-    void connect(final ManagedService managedService, final CapabilityCollector collector) {
-        collector.connect(managedService).subscribe().with(connectedManagedService -> {
-            services.put(connectedManagedService.id(), connectedManagedService);
-            publishModification(new ManagedServiceModification(Modification.UPDATE, connectedManagedService));
+    void connect(final ManagedService managedService, final CapabilityExtension collector) {
+        collector.connect(managedService).subscribe().with(connectionStatus -> {
+            ManagedService connected = managedService.updateStatus(connectionStatus);
+            services.put(connected.name(), connected);
+            publishModification(new ManagedServiceModification(connected, Modification.UPDATE));
         }, throwable -> {
-            ManagedService failed = managedService.copy(ManagedService.Status.FAILED);
-            services.put(failed.id(), failed);
-            publishModification(new ManagedServiceModification(Modification.UPDATE, failed));
+            ManagedService failed = managedService.updateStatus(Connection.failed(String
+                    .format("Unable to connect to managed service %s: %s", managedService.name(), throwable.getMessage())));
+            services.put(failed.name(), failed);
+            publishModification(new ManagedServiceModification(failed, Modification.UPDATE));
         });
     }
 
     // ------------------------------------------------------ add, delete
 
-    private void add(final Service service, final CapabilityCollector collector) {
+    private void add(final Service service, final CapabilityExtension collector) {
         Modification modification;
-        ManagedService managedService = services.get(service.getMetadata().getUid());
+        ManagedService managedService = services.get(service.getMetadata().getName());
         if (managedService == null) {
             modification = Modification.ADD;
             managedService = ManagedService.fromService(service, collector.capability());
         } else {
             modification = Modification.UPDATE;
-            managedService = managedService.copy(collector.capability());
+            managedService = managedService.addCapability(collector.capability());
         }
-        services.put(managedService.id(), managedService);
-        publishModification(new ManagedServiceModification(modification, managedService));
+        services.put(managedService.name(), managedService);
+        publishModification(new ManagedServiceModification(managedService, modification));
         connect(managedService, collector);
     }
 
-    private void delete(final Service service, final CapabilityCollector collector) {
-        ManagedService managedService = services.remove(service.getMetadata().getUid());
+    private void delete(final Service service, final CapabilityExtension collector) {
+        ManagedService managedService = services.remove(service.getMetadata().getName());
         if (managedService != null) {
-            publishModification(new ManagedServiceModification(Modification.DELETE, managedService));
+            publishModification(new ManagedServiceModification(managedService, Modification.DELETE));
             collector.close(managedService);
         }
     }
@@ -136,8 +138,8 @@ public class ManagedServiceRepository {
 
     // ------------------------------------------------------ properties
 
-    ManagedService managedService(final String id) {
-        return services.get(id);
+    ManagedService managedService(final String name) {
+        return services.get(name);
     }
 
     Set<ManagedService> managedServices() {

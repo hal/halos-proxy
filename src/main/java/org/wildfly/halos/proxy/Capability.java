@@ -17,7 +17,7 @@ package org.wildfly.halos.proxy;
 
 public interface Capability {
 
-    String id();
+    String name();
 
     String title();
 }

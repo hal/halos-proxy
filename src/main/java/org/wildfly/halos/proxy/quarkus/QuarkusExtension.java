@@ -20,9 +20,10 @@ import java.util.List;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import org.wildfly.halos.proxy.BaseCapabilityCollector;
+import org.wildfly.halos.proxy.BaseCapabilityExtension;
 import org.wildfly.halos.proxy.Capability;
-import org.wildfly.halos.proxy.CapabilityCollector;
+import org.wildfly.halos.proxy.CapabilityExtension;
+import org.wildfly.halos.proxy.Connection;
 import org.wildfly.halos.proxy.ManagedService;
 
 import io.fabric8.kubernetes.api.model.Service;
@@ -37,7 +38,7 @@ import static org.wildfly.halos.proxy.Constants.HTTPS_PORT;
 import static org.wildfly.halos.proxy.Constants.HTTP_PORT;
 
 @ApplicationScoped
-public class QuarkusCollector extends BaseCapabilityCollector implements CapabilityCollector {
+public class QuarkusExtension extends BaseCapabilityExtension implements CapabilityExtension {
 
     @Inject OpenShiftClient oc;
 
@@ -49,24 +50,22 @@ public class QuarkusCollector extends BaseCapabilityCollector implements Capabil
     }
 
     @Override
-    public Uni<ManagedService> connect(final ManagedService managedService) {
+    public Uni<Connection> connect(final ManagedService managedService) {
         List<Service> services = oc.services().withField("metadata.name", managedService.name()).list().getItems();
         if (services.isEmpty()) {
-            Log.errorf("Unable to connect to managed service %s: No service found for %s", managedService.name(),
-                    managedService.name());
-            return Uni.createFrom().item(managedService.copy(ManagedService.Status.FAILED));
+            return Uni.createFrom()
+                    .item(Connection.failed(String.format("Unable to connect to managed service %s: No service found for %s",
+                            managedService.name(), managedService.name())));
         } else if (services.size() > 1) {
-            Log.errorf("Unable to connect to managed service %s: More than one service found for %s", managedService.name(),
-                    managedService.name());
-            return Uni.createFrom().item(managedService.copy(ManagedService.Status.FAILED));
+            return Uni.createFrom().item(Connection.failed(String.format(
+                    "Unable to connect to managed service %1$s: More than one service found for %1$s", managedService.name())));
         } else {
             Service service = services.get(0);
             List<HostAndPort> hostAndPorts = routes(service);
-            ManagedService connectedManagedService = managedService.copy(ManagedService.Status.CONNECTED);
-            QuarkusService quarkusService = new QuarkusService(connectedManagedService, hostAndPorts);
-            quarkusServiceRepository.add(quarkusService);
+            QuarkusService quarkusService = new QuarkusService(managedService.name(), hostAndPorts);
+            quarkusServiceRepository.add(managedService, quarkusService);
             Log.infof("Successfully connected to managed service %s", managedService.name());
-            return Uni.createFrom().item(connectedManagedService);
+            return Uni.createFrom().item(Connection.connected());
         }
     }
 

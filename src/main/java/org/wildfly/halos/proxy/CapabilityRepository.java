@@ -29,22 +29,22 @@ import static java.util.stream.Collectors.toSet;
 public class CapabilityRepository {
 
     @Inject
-    @All List<CapabilityCollector> collectors;
+    @All List<CapabilityExtension> extensions;
 
-    List<CapabilityCollector> collectors() {
-        return List.copyOf(collectors);
+    List<CapabilityExtension> extensions() {
+        return List.copyOf(extensions);
     }
 
-    CapabilityCollector collector(final String id) {
-        for (CapabilityCollector collector : collectors) {
-            if (id.equals(collector.capability().id())) {
-                return collector;
+    CapabilityExtension extension(final String name) {
+        for (CapabilityExtension extension : extensions) {
+            if (name.equals(extension.capability().name())) {
+                return extension;
             }
         }
         return null;
     }
 
     Set<Capability> capabilities() {
-        return collectors.stream().map(CapabilityCollector::capability).collect(toSet());
+        return extensions.stream().map(CapabilityExtension::capability).collect(toSet());
     }
 }
