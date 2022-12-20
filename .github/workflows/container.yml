@@ -35,7 +35,6 @@ jobs:
         with:
           node-version: latest
           cache: 'npm'
-        working-directory: ./console
       - name: Build Console
         id: build-console
         run: |
