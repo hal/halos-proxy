@@ -20,7 +20,7 @@ jobs:
         id: checkout-console
         uses: actions/checkout@v3
         with:
-          repository: hal/halos-proxy
+          repository: hal/halos-console
           path: console
       - name: Set up JDK
         id: setup-jdk
@@ -34,6 +34,8 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: latest
+          cache: 'npm'
+          cache-dependency-path: console/package-lock.json
       - name: Login to Quay.io
         id: login-to-quay-io
         uses: docker/login-action@v2
