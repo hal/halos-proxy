@@ -34,8 +34,6 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: latest
-          cache: 'npm'
-          cache-dependency-path: console/package-lock.json
       - name: Login to Quay.io
         id: login-to-quay-io
         uses: docker/login-action@v2
