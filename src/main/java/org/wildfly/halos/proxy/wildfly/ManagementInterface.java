@@ -82,7 +82,6 @@ class ManagementInterface {
     private static final String REMOTE_HTTP = "remote+http";
 
     @Inject OpenShiftClient oc;
-
     @Inject LaunchMode launchMode;
 
     Uni<Tuple2<ModelControllerClient, WildFlyServer>> connect(final ManagedService managedService) {

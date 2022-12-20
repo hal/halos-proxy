@@ -37,7 +37,6 @@ public class WildFlyExtension extends BaseCapabilityExtension implements Capabil
     private static final long EXPIRE_IN = 60_000;
 
     @Inject ManagementInterface managementInterface;
-
     @Inject WildFlyServerRepository wildFlyServerRepository;
 
     @Override

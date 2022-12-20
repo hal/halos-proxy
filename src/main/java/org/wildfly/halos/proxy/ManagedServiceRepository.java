@@ -37,11 +37,9 @@ import io.smallrye.mutiny.operators.multi.processors.UnicastProcessor;
 @ApplicationScoped
 public class ManagedServiceRepository {
 
-    @ConfigProperty(name = "halos.label.selector", defaultValue = "managedby=halos") String halOsLabelSelector;
-
-    @Inject CapabilityRepository capabilityRepository;
-
     @Inject OpenShiftClient oc;
+    @Inject CapabilityRepository capabilityRepository;
+    @ConfigProperty(name = "halos.label.selector", defaultValue = "managedby=halos") String halOsLabelSelector;
 
     private final Map<String, ManagedService> services;
     private final UnicastProcessor<ManagedServiceModification> processor;

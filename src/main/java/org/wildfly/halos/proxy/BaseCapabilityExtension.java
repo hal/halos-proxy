@@ -29,9 +29,8 @@ public abstract class BaseCapabilityExtension implements CapabilityExtension {
     private static final String CAPABILITY_LABELS_PREFIX = "halos.capability.";
     private static final String CAPABILITY_LABELS_SUFFIX = ".label.selector";
 
-    private String labelSelector;
-
     @Inject Config config;
+    private String labelSelector;
 
     @PostConstruct
     void validate() {

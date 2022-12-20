@@ -41,7 +41,6 @@ import static org.wildfly.halos.proxy.Constants.HTTP_PORT;
 public class QuarkusExtension extends BaseCapabilityExtension implements CapabilityExtension {
 
     @Inject OpenShiftClient oc;
-
     @Inject QuarkusServiceRepository quarkusServiceRepository;
 
     @Override

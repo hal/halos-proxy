@@ -30,8 +30,8 @@ import io.quarkus.logging.Log;
 @ApplicationScoped
 class WildFlyServerRepository {
 
-    private final Map<String, WildFlyServer> servers;
-    private final Map<String, ModelControllerClient> clients;
+    private final Map<String, WildFlyServer> servers; // key == managed service name
+    private final Map<String, ModelControllerClient> clients; // key == managed service name
 
     WildFlyServerRepository() {
         servers = new ConcurrentHashMap<>();

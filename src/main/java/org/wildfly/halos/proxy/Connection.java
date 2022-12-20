@@ -31,7 +31,7 @@ public record Connection(Status status, LocalDateTime timestamp, String message)
         return new Connection(Status.CONNECTED, LocalDateTime.now(), null);
     }
 
-    public static Connection failed(String reason) {
+    public static Connection failed(final String reason) {
         return new Connection(Status.FAILED, LocalDateTime.now(), reason);
     }
 }
