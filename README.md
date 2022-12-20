@@ -1,6 +1,6 @@
 # halOS Proxy
 
-halOS stands for HAL on OpenShift. It is derived from [HAL](https://hal.github.io/) and allows monitoring and inspection of WildFly and other services running on OpenShift. Although the focus is on WildFly, halOS supports the monitoring of arbitrary service. This is achieved through the concept of capabilities and extensions.
+halOS stands for HAL on OpenShift. It is derived from [HAL](https://hal.github.io/)  and allows monitoring and inspection of WildFly and other services running on OpenShift. Although the focus is on WildFly, halOS supports monitoring arbitrary services. This is achieved through the concept of capabilities and extensions.
 
 ## Architecture
 
