@@ -21,7 +21,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: hal/halos-proxy
-          path: proxy
+          path: console
       - name: Set up JDK
         id: setup-jdk
         uses: actions/setup-java@v3
