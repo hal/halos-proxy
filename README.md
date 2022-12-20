@@ -38,7 +38,7 @@ _DEV_QUARKUS_KUBERNETES-CLIENT_TOKEN=<security token>
 _DEV_QUARKUS_KUBERNETES-CLIENT_NAMESPACE=<your namespace>
 ```
 
-Then run the proxy in dev mode, using
+Then start the proxy in dev mode, using
 
 ```shell
 ./mvnw quarkus:dev
