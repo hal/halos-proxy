@@ -35,13 +35,7 @@ jobs:
         with:
           node-version: latest
           cache: 'npm'
-      - name: Build Console
-        id: build-console
-        run: |
-          npm install
-          npx tsc
-          npx vite build --outDir ../src/main/resources/META-INF/resources
-        working-directory: ./console
+          cache-dependency-path: console/package-lock.json
       - name: Login to Quay.io
         id: login-to-quay-io
         uses: docker/login-action@v2
@@ -49,6 +43,13 @@ jobs:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_ROBOT_TOKEN }}
+      - name: Build Console
+        id: build-console
+        run: |
+          npm install
+          npx tsc
+          npx vite build --outDir ../src/main/resources/META-INF/resources
+        working-directory: ./console
       - name: Build Container
         id: build-container
         run: $MVN package -Dquarkus.container-image.build=true -Dquarkus.container-image.image=quay.io/halconsole/halos:latest -Dquarkus.container-image.registry=quay.io -Dquarkus.container-image.push=true '-Dquarkus.jib.labels."org.opencontainers.image.revision"='$GITHUB_SHA
