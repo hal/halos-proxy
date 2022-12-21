@@ -30,33 +30,48 @@ import io.quarkus.logging.Log;
 @ApplicationScoped
 class WildFlyServerRepository {
 
-    private final Map<String, WildFlyServer> servers; // key == managed service name
-    private final Map<String, ModelControllerClient> clients; // key == managed service name
+    private final Map<String, String> managedServiceToServer; // key == managed service name, value == WildFly server name
+    private final Map<String, WildFlyServer> servers; // key == WildFly server name
+    private final Map<String, ModelControllerClient> clients; // key == WildFly server name
 
     WildFlyServerRepository() {
+        managedServiceToServer = new ConcurrentHashMap<>();
         servers = new ConcurrentHashMap<>();
         clients = new ConcurrentHashMap<>();
     }
 
     void add(final ManagedService managedService, final ModelControllerClient modelControllerClient,
             final WildFlyServer wildFlyServer) {
-        clients.put(managedService.name(), modelControllerClient);
-        servers.put(managedService.name(), wildFlyServer);
+        String wildFlyServerName = wildFlyServer.name();
+        managedServiceToServer.put(managedService.name(), wildFlyServerName);
+        clients.put(wildFlyServerName, modelControllerClient);
+        servers.put(wildFlyServerName, wildFlyServer);
     }
 
     void remove(final ManagedService managedService) {
-        servers.remove(managedService.name());
-        ModelControllerClient client = clients.remove(managedService.name());
-        if (client != null) {
-            try {
-                client.close();
-            } catch (IOException e) {
-                Log.errorf("Error closing client for managed service %s: %s", managedService.name(), e.getMessage());
+        String wildFlyServerName = managedServiceToServer.remove(managedService.name());
+        if (wildFlyServerName != null) {
+            servers.remove(wildFlyServerName);
+            ModelControllerClient client = clients.remove(wildFlyServerName);
+            if (client != null) {
+                try {
+                    client.close();
+                } catch (IOException e) {
+                    Log.errorf("Error closing client for managed service %s: %s", managedService.name(), e.getMessage());
+                }
             }
         }
     }
 
     Set<WildFlyServer> wildFlyServers() {
         return Set.copyOf(servers.values());
+    }
+
+    WildFlyServer wildFlyServer(final String serverName) {
+        return servers.get(serverName);
+    }
+
+    ModelControllerClient client(final String serverName) {
+        return clients.get(serverName);
     }
 }

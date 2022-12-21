@@ -181,8 +181,8 @@ class ManagementInterface {
                             DeploymentStatus.UNDEFINED);
                     boolean enabled = deploymentNode.get(ENABLED).asBoolean();
                     return new Deployment(deploymentName, status, enabled,
-                            ModelNodeHelper.failSafeLocalDateTime(deploymentNode, ENABLED_TIME),
-                            ModelNodeHelper.failSafeLocalDateTime(deploymentNode, DISABLED_TIME));
+                            ModelNodeHelper.failSafeLocalDateTime(deploymentNode, DISABLED_TIME),
+                            ModelNodeHelper.failSafeLocalDateTime(deploymentNode, ENABLED_TIME));
                 }).collect(Collectors.toSet());
 
                 return new WildFlyServer(managedService.name(), serverName, productName, productVersion, coreVersion,

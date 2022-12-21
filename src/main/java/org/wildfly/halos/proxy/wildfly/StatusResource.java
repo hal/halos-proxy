@@ -15,8 +15,6 @@
  */
 package org.wildfly.halos.proxy.wildfly;
 
-import java.util.Collection;
-
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -25,23 +23,23 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.jboss.as.controller.client.ModelControllerClient;
+
 @Path("/api/v1/wildfly/servers")
 @Produces(MediaType.APPLICATION_JSON)
-public class WildFlyServerResource {
+public class StatusResource {
 
-    @Inject WildFlyServerRepository repository;
-
-    @GET
-    public Collection<WildFlyServer> servers() {
-        return repository.wildFlyServers();
-    }
+    @Inject WildFlyServerRepository serverRepository;
+    @Inject StatusRepository statusRepository;
 
     @GET
-    @Path("/{serverName}")
-    public Response server(@PathParam("serverName") final String serverName) {
-        WildFlyServer server = repository.wildFlyServer(serverName);
-        if (server != null) {
-            return Response.ok(server).build();
+    @Path("/{serverName}/status")
+    public Response status(@PathParam("serverName") final String serverName) {
+        WildFlyServer server = serverRepository.wildFlyServer(serverName);
+        ModelControllerClient client = serverRepository.client(serverName);
+        if (client != null && server != null) {
+            Status status = statusRepository.status(client, server);
+            return Response.ok(status).build();
         } else {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
