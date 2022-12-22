@@ -18,18 +18,14 @@ package org.wildfly.halos.proxy.wildfly;
 public record Status(OperatingSystem os, Runtime runtime, Memory heap, Memory nonHeap, Threads threads) {
 
     public record OperatingSystem(String name, String version, int processors) {
-
     }
 
     public record Runtime(String jvmName, String spec, long uptime) {
-
     }
 
     public record Memory(long used, long committed, long max) {
-
     }
 
     public record Threads(long threads, long daemons) {
-
     }
 }
