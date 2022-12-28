@@ -28,9 +28,9 @@
     </parent>
 
     <artifactId>halos-wildfly-capability</artifactId>
+    <packaging>jar</packaging>
     <name>halOS :: WildFly Capability</name>
     <description>halOS WildFly capability</description>
-    <packaging>jar</packaging>
 
     <properties>
         <version.semantic.version>2.1.1</version.semantic.version>

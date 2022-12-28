@@ -28,9 +28,9 @@
     </parent>
 
     <artifactId>halos-proxy</artifactId>
+    <packaging>jar</packaging>
     <name>halOS :: Proxy</name>
     <description>halOS proxy</description>
-    <packaging>jar</packaging>
 
     <dependencyManagement>
         <dependencies>

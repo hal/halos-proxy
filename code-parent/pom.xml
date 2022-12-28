@@ -27,9 +27,9 @@
     </parent>
 
     <artifactId>halos-code-parent</artifactId>
+    <packaging>pom</packaging>
     <name>halOS :: Code Parent</name>
     <description>Parent for modules with code. Contains dependencies and plugin management</description>
-    <packaging>pom</packaging>
 
     <dependencyManagement>
         <dependencies>
