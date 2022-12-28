@@ -34,7 +34,7 @@ Please refer to the halOS [distribution](https://github.com/hal/halos-distributi
 
 To run the proxy, you need to have access to an OpenShift cluster. The easiest way to get started is to use the [OpenShift sandbox](https://developers.redhat.com/developer-sandbox). The sandbox provides you with a private OpenShift environment in a shared, multi-tenant OpenShift cluster that is pre-configured with a set of developer tools.
 
-Once you have access to your OpenShift cluster, create a [`.env`](https://quarkus.io/guides/config-reference#env-file) file in the root folder and add the following settings:
+Once you have access to your OpenShift cluster, create a [`.env`](https://quarkus.io/guides/config-reference#env-file) file in the `proxy` folder and add the following settings:
 
 ```shell
 _DEV_QUARKUS_KUBERNETES-CLIENT_MASTER-URL=<OpenShift REST API>
