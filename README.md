@@ -4,7 +4,7 @@ halOS stands for **HAL** on **O**pen**S**hift. It is derived from [HAL](https://
 
 ## Architecture
 
-![halos](halos.png)
+![halos](halos.svg)
 
 halOS consists of two parts:
 
