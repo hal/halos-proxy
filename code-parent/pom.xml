@@ -21,112 +21,39 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.jboss</groupId>
-        <artifactId>jboss-parent</artifactId>
-        <version>39</version>
+        <groupId>org.wildfly.halos</groupId>
+        <artifactId>halos-proxy-parent</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.wildfly.halos</groupId>
-    <artifactId>halos-proxy-parent</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <artifactId>halos-code-parent</artifactId>
+    <name>halOS :: Code Parent</name>
+    <description>Parent for modules with code. Contains dependencies and plugin management</description>
     <packaging>pom</packaging>
-    <name>halOS :: Parent</name>
-    <description>HAL on OpenShift</description>
-    <url>https://github.com/hal/halos-proxy</url>
-    <inceptionYear>2022</inceptionYear>
 
-    <licenses>
-        <license>
-            <name>Apache License, Version 2.0</name>
-            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
+    <dependencyManagement>
+        <dependencies>
+            <!-- halOS -->
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>halos-bom</artifactId>
+                <version>${project.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
 
-    <organization>
-        <name>Red Hat</name>
-        <url>https://developers.redhat.com/</url>
-    </organization>
-    <developers>
-        <developer>
-            <name>Harald Pehl</name>
-            <id>hpehl</id>
-            <email>hpehl@redhat.com</email>
-            <organization>Red Hat</organization>
-            <timezone>+1</timezone>
-        </developer>
-    </developers>
-
-    <scm>
-        <connection>scm:git:${repo.scm.connection}</connection>
-        <developerConnection>scm:git:${repo.scm.connection}</developerConnection>
-        <url>${repo.scm.url}</url>
-        <tag>HEAD</tag>
-    </scm>
-
-    <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>${repo.sonatype.url}/content/repositories/snapshots</url>
-        </snapshotRepository>
-        <repository>
-            <id>ossrh</id>
-            <url>${repo.sonatype.url}/service/local/staging/deploy/maven2/</url>
-        </repository>
-    </distributionManagement>
-
-    <properties>
-        <!-- Dependency versions -->
-        <version.checkstyle.config>1.0.8.Final</version.checkstyle.config>
-        <version.checkstyle>10.5.0</version.checkstyle>
-        <version.halos.console>0.0.1</version.halos.console>
-        <version.junit>5.9.1</version.junit>
-        <version.quarkus>2.15.1.Final</version.quarkus>
-
-        <!-- Plugin versions -->
-        <version.checkstyle.plugin>3.2.0</version.checkstyle.plugin>
-        <version.enforcer.plugin>3.0.0-M3</version.enforcer.plugin>
-        <version.formatter.plugin>2.21.0</version.formatter.plugin>
-        <version.impsort.plugin>1.8.0</version.impsort.plugin>
-        <version.keepachangelog>2.1.1</version.keepachangelog>
-        <version.license.plugin>4.1</version.license.plugin>
-        <version.nexus.staging.plugin>1.6.13</version.nexus.staging.plugin>
-
-        <!-- Repos, URLs & protocols -->
-        <repo.scm.connection>git@github.com:hal/halos-proxy.git</repo.scm.connection>
-        <repo.scm.url>https://github.com/hal/halos-proxy</repo.scm.url>
-        <repo.sonatype.url>https://s01.oss.sonatype.org</repo.sonatype.url>
-
-        <!-- Build related -->
-        <encoding>UTF-8</encoding>
-        <java.version>17</java.version>
-        <maven.compiler.source>${java.version}</maven.compiler.source>
-        <maven.compiler.target>${java.version}</maven.compiler.target>
-        <maven.min.version>3.2.5</maven.min.version>
-        <project.build.sourceEncoding>${encoding}</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>${encoding}</project.reporting.outputEncoding>
-        <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
-        <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
-    </properties>
-
-    <modules>
-        <module>api</module>
-        <module>bom</module>
-        <module>build-config</module>
-        <module>capabilities/quarkus</module>
-        <module>capabilities/wildfly</module>
-        <module>code-parent</module>
-        <module>proxy</module>
-    </modules>
-
-    <!-- No dependencies! Dependencies are managed in code-parent -->
-    <dependencies/>
+            <!-- Quarkus -->
+            <dependency>
+                <groupId>${quarkus.platform.group-id}</groupId>
+                <artifactId>${quarkus.platform.artifact-id}</artifactId>
+                <version>${version.quarkus}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
-        <!--
-            All plugins are declared and (partly) configured here.
-            Some of them are redefined in code-parent
-        -->
         <pluginManagement>
             <plugins>
                 <!-- Ordered by artifactID -->
@@ -134,58 +61,45 @@
                     <groupId>net.revelc.code.formatter</groupId>
                     <artifactId>formatter-maven-plugin</artifactId>
                     <version>${version.formatter.plugin}</version>
+                    <configuration>
+                        <configFile>etc/eclipse-formatter-config.xml</configFile>
+                    </configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>halos-build-config</artifactId>
+                            <version>${project.version}</version>
+                        </dependency>
+                    </dependencies>
                 </plugin>
                 <plugin>
                     <groupId>com.mycila</groupId>
                     <artifactId>license-maven-plugin</artifactId>
                     <version>${version.license.plugin}</version>
                     <configuration>
-                        <header>build-config/src/main/resources/etc/license.txt</header>
-                        <strictCheck>true</strictCheck>
-                        <aggregate>true</aggregate>
-                        <useDefaultExcludes>true</useDefaultExcludes>
-                        <excludes>
-                            <exclude>.env</exclude>
-                            <exclude>.sdkmanrc</exclude>
-                            <exclude>CODEOWNERS</exclude>
-                            <exclude>LICENSE</exclude>
-                            <exclude>**/banner.txt</exclude>
-                            <exclude>**/*license*.txt</exclude>
-                        </excludes>
+                        <header>etc/license.txt</header>
                     </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>net.revelc.code</groupId>
-                    <artifactId>impsort-maven-plugin</artifactId>
-                    <version>${version.impsort.plugin}</version>
-                    <configuration>
-                        <compliance>${java.version}</compliance>
-                        <groups>java.,javax.,org.,io.,com.</groups>
-                        <removeUnused>true</removeUnused>
-                        <staticAfter>true</staticAfter>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>co.enear.maven.plugins</groupId>
-                    <artifactId>keepachangelog-maven-plugin</artifactId>
-                    <version>${version.keepachangelog}</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>halos-build-config</artifactId>
+                            <version>${project.version}</version>
+                        </dependency>
+                    </dependencies>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-checkstyle-plugin</artifactId>
+                    <version>${version.checkstyle.plugin}</version>
                     <configuration>
-                        <configLocation>wildfly-checkstyle/checkstyle.xml</configLocation>
-                        <consoleOutput>true</consoleOutput>
-                        <failsOnError>true</failsOnError>
-                        <includeTestSourceDirectory>true</includeTestSourceDirectory>
-                        <excludes>**/*$logger.java,**/*$bundle.java</excludes>
+                        <suppressionsLocation>etc/checkstyle-suppressions.xml</suppressionsLocation>
                         <useFile/>
                     </configuration>
                     <dependencies>
                         <dependency>
-                            <groupId>org.wildfly.checkstyle</groupId>
-                            <artifactId>wildfly-checkstyle-config</artifactId>
-                            <version>${version.checkstyle.config}</version>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>halos-build-config</artifactId>
+                            <version>${project.version}</version>
                         </dependency>
                     </dependencies>
                 </plugin>
@@ -221,23 +135,63 @@
                         </rules>
                     </configuration>
                 </plugin>
-                <plugin>
-                    <groupId>org.sonatype.plugins</groupId>
-                    <artifactId>nexus-staging-maven-plugin</artifactId>
-                    <version>${version.nexus.staging.plugin}</version>
-                    <extensions>true</extensions>
-                </plugin>
-                <plugin>
-                    <groupId>${quarkus.platform.group-id}</groupId>
-                    <artifactId>quarkus-maven-plugin</artifactId>
-                    <version>${version.quarkus}</version>
-                    <extensions>true</extensions>
-                </plugin>
+                    <plugin>
+                        <groupId>org.sonatype.plugins</groupId>
+                        <artifactId>nexus-staging-maven-plugin</artifactId>
+                        <version>${version.nexus.staging.plugin}</version>
+                        <extensions>true</extensions>
+                    </plugin>
+                    <plugin>
+                        <groupId>${quarkus.platform.group-id}</groupId>
+                        <artifactId>quarkus-maven-plugin</artifactId>
+                        <version>${version.quarkus}</version>
+                        <extensions>true</extensions>
+                    </plugin>
             </plugins>
         </pluginManagement>
 
         <plugins>
             <!-- Ordered by artifactID -->
+            <plugin>
+                <groupId>net.revelc.code.formatter</groupId>
+                <artifactId>formatter-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>formatter-format</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>format</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>formatter-check</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>validate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>net.revelc.code</groupId>
+                <artifactId>impsort-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>impsort-sort</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>sort</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>impsort-check</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
@@ -260,6 +214,28 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>checkstyle-check</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <compilerArgs>
+                        <arg>-parameters</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
                 <executions>
                     <execution>
@@ -270,6 +246,37 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <native.image.path>${project.build.directory}/${project.build.finalName}-runner</native.image.path>
+                                <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+                                <!--suppress MavenModelInspection -->
+                                <maven.home>${maven.home}</maven.home>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <systemPropertyVariables>
+                        <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+                        <!--suppress MavenModelInspection -->
+                        <maven.home>${maven.home}</maven.home>
+                    </systemPropertyVariables>
+                </configuration>
             </plugin>
         </plugins>
     </build>

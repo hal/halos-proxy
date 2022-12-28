@@ -45,5 +45,6 @@ _DEV_QUARKUS_KUBERNETES-CLIENT_NAMESPACE=<your namespace>
 Then start the proxy in dev mode, using
 
 ```shell
+cd proxy
 ./mvnw quarkus:dev
 ```

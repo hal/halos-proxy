@@ -16,9 +16,8 @@
 package org.wildfly.halos.proxy.wildfly;
 
 import org.wildfly.halos.proxy.Capability;
-import org.wildfly.halos.proxy.quarkus.QuarkusCapability;
 
 public record WildFlyCapability(String name, String title) implements Capability {
 
-    public static final Capability INSTANCE = new QuarkusCapability("wildfly", "WildFly");
+    public static final Capability INSTANCE = new WildFlyCapability("wildfly", "WildFly");
 }
