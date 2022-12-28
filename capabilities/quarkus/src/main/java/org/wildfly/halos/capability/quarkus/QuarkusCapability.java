@@ -15,7 +15,7 @@
  */
 package org.wildfly.halos.capability.quarkus;
 
-import org.wildfly.halos.proxy.Capability;
+import org.wildfly.halos.api.Capability;
 
 public record QuarkusCapability(String name, String title) implements Capability {
 

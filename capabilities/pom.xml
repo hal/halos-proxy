@@ -22,36 +22,33 @@
 
     <parent>
         <groupId>org.wildfly.halos</groupId>
-        <artifactId>halos-parent</artifactId>
+        <artifactId>halos-code-parent</artifactId>
         <version>0.0.1-SNAPSHOT</version>
+        <relativePath>../code-parent/pom.xml</relativePath>
     </parent>
 
-    <artifactId>halos-bom</artifactId>
+    <artifactId>halos-capabilities</artifactId>
     <packaging>pom</packaging>
-    <name>halOS :: BOM</name>
-    <description>Bill of materials</description>
+    <name>halOS :: Capabilities</name>
+    <description>halOS built-in capabilities</description>
+
+    <modules>
+        <module>quarkus</module>
+        <module>wildfly</module>
+    </modules>
 
     <dependencyManagement>
         <dependencies>
              <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>halos-api</artifactId>
+                <artifactId>halos-quarkus-capability</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+             <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>halos-wildfly-capability</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
-
-    <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>com.mycila</groupId>
-                    <artifactId>license-maven-plugin</artifactId>
-                    <configuration>
-                        <header>../build-config/src/main/resources/etc/license.txt</header>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-    </build>
 </project>

@@ -23,6 +23,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import org.wildfly.halos.api.Capability;
+
 @Path("/api/v1/capabilities")
 @Produces(MediaType.APPLICATION_JSON)
 public class CapabilityResource {

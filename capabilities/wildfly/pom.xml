@@ -33,10 +33,24 @@
     <packaging>jar</packaging>
 
     <properties>
-        <version.guava>31.1-jre</version.guava>
         <version.semantic.version>2.1.1</version.semantic.version>
         <version.wildfly.quarkus>0.0.1.Final</version.wildfly.quarkus>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+        <dependency>
+            <groupId>de.skuzzle</groupId>
+            <artifactId>semantic-version</artifactId>
+            <version>${version.semantic.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wildfly.quarkus</groupId>
+            <artifactId>quarkus-wildfly-client</artifactId>
+            <version>${version.wildfly.quarkus}</version>
+        </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -56,19 +70,20 @@
             <artifactId>quarkus-resteasy-reactive-jsonb</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-openshift-client</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>${version.guava}</version>
         </dependency>
         <dependency>
             <groupId>de.skuzzle</groupId>
             <artifactId>semantic-version</artifactId>
-            <version>${version.semantic.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wildfly.quarkus</groupId>
             <artifactId>quarkus-wildfly-client</artifactId>
-            <version>${version.wildfly.quarkus}</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>

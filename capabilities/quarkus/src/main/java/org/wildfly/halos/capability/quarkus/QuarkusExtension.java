@@ -20,11 +20,11 @@ import java.util.List;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import org.wildfly.halos.proxy.BaseCapabilityExtension;
-import org.wildfly.halos.proxy.Capability;
-import org.wildfly.halos.proxy.CapabilityExtension;
-import org.wildfly.halos.proxy.Connection;
-import org.wildfly.halos.proxy.ManagedService;
+import org.wildfly.halos.api.BaseCapabilityExtension;
+import org.wildfly.halos.api.Capability;
+import org.wildfly.halos.api.CapabilityExtension;
+import org.wildfly.halos.api.Connection;
+import org.wildfly.halos.api.ManagedService;
 
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.openshift.client.OpenShiftClient;
@@ -34,8 +34,8 @@ import io.smallrye.mutiny.Uni;
 import com.google.common.net.HostAndPort;
 
 import static java.util.stream.Collectors.toList;
-import static org.wildfly.halos.proxy.Constants.HTTPS_PORT;
-import static org.wildfly.halos.proxy.Constants.HTTP_PORT;
+import static org.wildfly.halos.api.Constants.HTTPS_PORT;
+import static org.wildfly.halos.api.Constants.HTTP_PORT;
 
 @ApplicationScoped
 public class QuarkusExtension extends BaseCapabilityExtension implements CapabilityExtension {

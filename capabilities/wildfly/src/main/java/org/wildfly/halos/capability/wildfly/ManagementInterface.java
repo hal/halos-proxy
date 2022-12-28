@@ -30,12 +30,12 @@ import javax.security.sasl.RealmCallback;
 
 import org.jboss.as.controller.client.ModelControllerClient;
 import org.jboss.dmr.ModelNode;
+import org.wildfly.halos.api.ManagedService;
 import org.wildfly.halos.capability.wildfly.dmr.Composite;
 import org.wildfly.halos.capability.wildfly.dmr.CompositeResult;
 import org.wildfly.halos.capability.wildfly.dmr.ModelNodeHelper;
 import org.wildfly.halos.capability.wildfly.dmr.Operation;
 import org.wildfly.halos.capability.wildfly.dmr.ResourceAddress;
-import org.wildfly.halos.proxy.ManagedService;
 
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServicePort;
@@ -50,6 +50,8 @@ import com.google.common.net.HostAndPort;
 
 import de.skuzzle.semantic.Version;
 
+import static org.wildfly.halos.api.Constants.HTTPS_PORT;
+import static org.wildfly.halos.api.Constants.HTTP_PORT;
 import static org.wildfly.halos.capability.wildfly.dmr.ModelDescriptionConstants.ATTRIBUTES_ONLY;
 import static org.wildfly.halos.capability.wildfly.dmr.ModelDescriptionConstants.CHILD_TYPE;
 import static org.wildfly.halos.capability.wildfly.dmr.ModelDescriptionConstants.DEPLOYMENT;
@@ -72,8 +74,6 @@ import static org.wildfly.halos.capability.wildfly.dmr.ModelDescriptionConstants
 import static org.wildfly.halos.capability.wildfly.dmr.ModelDescriptionConstants.SERVER_STATE;
 import static org.wildfly.halos.capability.wildfly.dmr.ModelDescriptionConstants.STATUS;
 import static org.wildfly.halos.capability.wildfly.dmr.ModelDescriptionConstants.SUSPEND_STATE;
-import static org.wildfly.halos.proxy.Constants.HTTPS_PORT;
-import static org.wildfly.halos.proxy.Constants.HTTP_PORT;
 
 @ApplicationScoped
 class ManagementInterface {

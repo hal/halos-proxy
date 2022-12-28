@@ -21,6 +21,9 @@ import java.util.Set;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import org.wildfly.halos.api.Capability;
+import org.wildfly.halos.api.CapabilityExtension;
+
 import io.quarkus.arc.All;
 
 import static java.util.stream.Collectors.toSet;

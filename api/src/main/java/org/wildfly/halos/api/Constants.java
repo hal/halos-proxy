@@ -13,25 +13,10 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.wildfly.halos.proxy;
+package org.wildfly.halos.api;
 
-import java.time.LocalDateTime;
+public interface Constants {
 
-public record Connection(Status status, LocalDateTime timestamp, String message) {
-
-    public enum Status {
-        PENDING, CONNECTED, FAILED
-    }
-
-    public static Connection pending() {
-        return new Connection(Status.PENDING, LocalDateTime.now(), null);
-    }
-
-    public static Connection connected() {
-        return new Connection(Status.CONNECTED, LocalDateTime.now(), null);
-    }
-
-    public static Connection failed(final String reason) {
-        return new Connection(Status.FAILED, LocalDateTime.now(), reason);
-    }
+    int HTTP_PORT = 80;
+    int HTTPS_PORT = 443;
 }

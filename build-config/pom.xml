@@ -21,14 +21,14 @@
 
     <parent>
         <groupId>org.wildfly.halos</groupId>
-        <artifactId>halos-proxy-parent</artifactId>
+        <artifactId>halos-parent</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>halos-build-config</artifactId>
+    <packaging>jar</packaging>
     <name>halOS :: Build Config</name>
     <description>Build configuration for checkstyle, eclipse formatter and license check</description>
-    <packaging>jar</packaging>
 
     <build>
         <pluginManagement>

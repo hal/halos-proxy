@@ -27,7 +27,7 @@
     </parent>
 
     <groupId>org.wildfly.halos</groupId>
-    <artifactId>halos-proxy-parent</artifactId>
+    <artifactId>halos-parent</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>halOS :: Parent</name>
@@ -113,8 +113,7 @@
         <module>api</module>
         <module>bom</module>
         <module>build-config</module>
-        <module>capabilities/quarkus</module>
-        <module>capabilities/wildfly</module>
+        <module>capabilities</module>
         <module>code-parent</module>
         <module>proxy</module>
     </modules>
@@ -136,6 +135,17 @@
                     <version>${version.formatter.plugin}</version>
                 </plugin>
                 <plugin>
+                    <groupId>net.revelc.code</groupId>
+                    <artifactId>impsort-maven-plugin</artifactId>
+                    <version>${version.impsort.plugin}</version>
+                    <configuration>
+                        <compliance>${java.version}</compliance>
+                        <groups>java.,javax.,org.,io.,com.</groups>
+                        <removeUnused>true</removeUnused>
+                        <staticAfter>true</staticAfter>
+                    </configuration>
+                </plugin>
+                <plugin>
                     <groupId>com.mycila</groupId>
                     <artifactId>license-maven-plugin</artifactId>
                     <version>${version.license.plugin}</version>
@@ -145,24 +155,13 @@
                         <aggregate>true</aggregate>
                         <useDefaultExcludes>true</useDefaultExcludes>
                         <excludes>
-                            <exclude>.env</exclude>
                             <exclude>.sdkmanrc</exclude>
                             <exclude>CODEOWNERS</exclude>
                             <exclude>LICENSE</exclude>
                             <exclude>**/banner.txt</exclude>
+                            <exclude>**/.env</exclude>
                             <exclude>**/*license*.txt</exclude>
                         </excludes>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>net.revelc.code</groupId>
-                    <artifactId>impsort-maven-plugin</artifactId>
-                    <version>${version.impsort.plugin}</version>
-                    <configuration>
-                        <compliance>${java.version}</compliance>
-                        <groups>java.,javax.,org.,io.,com.</groups>
-                        <removeUnused>true</removeUnused>
-                        <staticAfter>true</staticAfter>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -239,6 +238,46 @@
         <plugins>
             <!-- Ordered by artifactID -->
             <plugin>
+                <groupId>net.revelc.code.formatter</groupId>
+                <artifactId>formatter-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>formatter-format</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>format</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>formatter-check</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>validate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>net.revelc.code</groupId>
+                <artifactId>impsort-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>impsort-sort</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>sort</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>impsort-check</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
                 <executions>
@@ -251,6 +290,19 @@
                     </execution>
                     <execution>
                         <id>license-check</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>checkstyle-check</id>
                         <phase>verify</phase>
                         <goals>
                             <goal>check</goal>
@@ -287,7 +339,6 @@
                 <quarkus.package.type>native</quarkus.package.type>
             </properties>
         </profile>
-
         <profile>
             <id>release</id>
             <build>

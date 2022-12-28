@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.wildfly.halos.proxy;
+package org.wildfly.halos.api;
 
 import java.util.Optional;
 
@@ -29,7 +29,8 @@ public abstract class BaseCapabilityExtension implements CapabilityExtension {
     private static final String CAPABILITY_LABELS_PREFIX = "halos.capability.";
     private static final String CAPABILITY_LABELS_SUFFIX = ".label.selector";
 
-    @Inject Config config;
+    @Inject
+    Config config;
     private String labelSelector;
 
     @PostConstruct

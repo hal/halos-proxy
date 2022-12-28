@@ -23,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.enterprise.context.ApplicationScoped;
 
 import org.jboss.as.controller.client.ModelControllerClient;
-import org.wildfly.halos.proxy.ManagedService;
+import org.wildfly.halos.api.ManagedService;
 
 import io.quarkus.logging.Log;
 

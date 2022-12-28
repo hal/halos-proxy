@@ -22,19 +22,14 @@
 
     <parent>
         <groupId>org.wildfly.halos</groupId>
-        <artifactId>halos-code-parent</artifactId>
+        <artifactId>halos-capabilities</artifactId>
         <version>0.0.1-SNAPSHOT</version>
-        <relativePath>../../code-parent/pom.xml</relativePath>
     </parent>
 
     <artifactId>halos-quarkus-capability</artifactId>
+    <packaging>jar</packaging>
     <name>halOS :: Quarkus Capability</name>
     <description>halOS Quarkus capability</description>
-    <packaging>jar</packaging>
-
-    <properties>
-        <version.guava>31.1-jre</version.guava>
-    </properties>
 
     <dependencies>
         <dependency>
@@ -54,9 +49,12 @@
             <artifactId>quarkus-resteasy-reactive-jsonb</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-openshift-client</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>${version.guava}</version>
         </dependency>
     </dependencies>
 </project>

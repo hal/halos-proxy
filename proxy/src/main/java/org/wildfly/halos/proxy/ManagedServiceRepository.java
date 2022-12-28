@@ -24,6 +24,12 @@ import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.wildfly.halos.api.Capability;
+import org.wildfly.halos.api.CapabilityExtension;
+import org.wildfly.halos.api.Connection;
+import org.wildfly.halos.api.ManagedService;
+import org.wildfly.halos.api.ManagedServiceModification;
+import org.wildfly.halos.api.Modification;
 
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.client.Watcher;

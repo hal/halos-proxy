@@ -13,11 +13,8 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.wildfly.halos.proxy;
+package org.wildfly.halos.api;
 
-public interface Capability {
-
-    String name();
-
-    String title();
+public enum Modification {
+    ADD, UPDATE, DELETE
 }

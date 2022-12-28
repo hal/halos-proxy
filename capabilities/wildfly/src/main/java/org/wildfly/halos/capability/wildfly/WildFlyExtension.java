@@ -20,11 +20,11 @@ import java.time.Duration;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import org.wildfly.halos.proxy.BaseCapabilityExtension;
-import org.wildfly.halos.proxy.Capability;
-import org.wildfly.halos.proxy.CapabilityExtension;
-import org.wildfly.halos.proxy.Connection;
-import org.wildfly.halos.proxy.ManagedService;
+import org.wildfly.halos.api.BaseCapabilityExtension;
+import org.wildfly.halos.api.Capability;
+import org.wildfly.halos.api.CapabilityExtension;
+import org.wildfly.halos.api.Connection;
+import org.wildfly.halos.api.ManagedService;
 
 import io.quarkus.logging.Log;
 import io.smallrye.mutiny.Uni;

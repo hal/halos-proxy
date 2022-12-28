@@ -21,7 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.enterprise.context.ApplicationScoped;
 
-import org.wildfly.halos.proxy.ManagedService;
+import org.wildfly.halos.api.ManagedService;
 
 @ApplicationScoped
 class QuarkusServiceRepository {

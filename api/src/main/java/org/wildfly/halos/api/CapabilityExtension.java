@@ -13,10 +13,17 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.wildfly.halos.proxy;
+package org.wildfly.halos.api;
 
-public interface Constants {
+import io.smallrye.mutiny.Uni;
 
-    int HTTP_PORT = 80;
-    int HTTPS_PORT = 443;
+public interface CapabilityExtension {
+
+    Capability capability();
+
+    String labelSelector();
+
+    Uni<Connection> connect(ManagedService managedService);
+
+    void close(ManagedService managedService);
 }

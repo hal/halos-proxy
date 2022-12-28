@@ -13,17 +13,11 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.wildfly.halos.proxy;
+package org.wildfly.halos.api;
 
-import io.smallrye.mutiny.Uni;
+public interface Capability {
 
-public interface CapabilityExtension {
+    String name();
 
-    Capability capability();
-
-    String labelSelector();
-
-    Uni<Connection> connect(ManagedService managedService);
-
-    void close(ManagedService managedService);
+    String title();
 }

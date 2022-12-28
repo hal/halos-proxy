@@ -15,7 +15,7 @@
  */
 package org.wildfly.halos.capability.wildfly;
 
-import org.wildfly.halos.proxy.Capability;
+import org.wildfly.halos.api.Capability;
 
 public record WildFlyCapability(String name, String title) implements Capability {
 

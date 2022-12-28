@@ -32,6 +32,19 @@
     <description>halOS proxy</description>
     <packaging>jar</packaging>
 
+    <dependencyManagement>
+        <dependencies>
+            <!-- halOS built-in capabilities-->
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>halos-capabilities</artifactId>
+                <version>${project.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <dependency>
             <groupId>org.wildfly.halos</groupId>

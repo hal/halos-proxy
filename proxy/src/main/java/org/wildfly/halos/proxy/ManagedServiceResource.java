@@ -27,6 +27,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.jboss.resteasy.reactive.RestStreamElementType;
+import org.wildfly.halos.api.CapabilityExtension;
+import org.wildfly.halos.api.Connection;
+import org.wildfly.halos.api.ManagedService;
+import org.wildfly.halos.api.ManagedServiceModification;
 
 import io.smallrye.mutiny.Multi;
 
