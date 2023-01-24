@@ -17,7 +17,7 @@ package org.wildfly.halos.capability.wildfly;
 
 import java.io.IOException;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import org.jboss.as.controller.client.ModelControllerClient;
 import org.jboss.dmr.ModelNode;

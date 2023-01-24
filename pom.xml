@@ -81,7 +81,7 @@
         <version.checkstyle>10.5.0</version.checkstyle>
         <version.halos.console>0.0.1</version.halos.console>
         <version.junit>5.9.1</version.junit>
-        <version.quarkus>2.15.3.Final</version.quarkus>
+        <version.quarkus>3.0.0.Alpha3</version.quarkus>
 
         <!-- Plugin versions -->
         <version.checkstyle.plugin>3.2.1</version.checkstyle.plugin>
@@ -99,7 +99,7 @@
 
         <!-- Build related -->
         <encoding>UTF-8</encoding>
-        <java.version>17</java.version>
+        <java.version>19</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <maven.min.version>3.2.5</maven.min.version>
@@ -139,8 +139,13 @@
                     <artifactId>impsort-maven-plugin</artifactId>
                     <version>${version.impsort.plugin}</version>
                     <configuration>
-                        <compliance>${java.version}</compliance>
-                        <groups>java.,javax.,org.,io.,com.</groups>
+                        <!-- TODO
+                                Revert to <compliance>${java.version}</compliance>
+                                as soon as there's a constant for Java 19 in
+                                https://github.com/javaparser/javaparser/blob/master/javaparser-core/src/main/java/com/github/javaparser/ParserConfiguration.java
+                        -->
+                        <compliance>17</compliance>
+                        <groups>java.,jakarta.,org.,io.,com.</groups>
                         <removeUnused>true</removeUnused>
                         <staticAfter>true</staticAfter>
                     </configuration>

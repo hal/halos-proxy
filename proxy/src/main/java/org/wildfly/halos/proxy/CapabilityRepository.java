@@ -18,8 +18,8 @@ package org.wildfly.halos.proxy;
 import java.util.List;
 import java.util.Set;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import org.wildfly.halos.api.Capability;
 import org.wildfly.halos.api.CapabilityExtension;

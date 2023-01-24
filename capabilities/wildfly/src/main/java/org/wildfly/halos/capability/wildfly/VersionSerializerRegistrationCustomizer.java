@@ -15,11 +15,11 @@
  */
 package org.wildfly.halos.capability.wildfly;
 
-import javax.inject.Singleton;
-import javax.json.bind.JsonbConfig;
-import javax.json.bind.serializer.JsonbSerializer;
-import javax.json.bind.serializer.SerializationContext;
-import javax.json.stream.JsonGenerator;
+import jakarta.inject.Singleton;
+import jakarta.json.bind.JsonbConfig;
+import jakarta.json.bind.serializer.JsonbSerializer;
+import jakarta.json.bind.serializer.SerializationContext;
+import jakarta.json.stream.JsonGenerator;
 
 import io.quarkus.jsonb.JsonbConfigCustomizer;
 
