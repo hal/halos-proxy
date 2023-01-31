@@ -48,7 +48,7 @@ jobs:
         run: |
           npm install
           npx tsc
-          npx vite build --outDir ../src/main/resources/META-INF/resources
+          npx vite build --outDir ../proxy/src/main/resources/META-INF/resources
         working-directory: ./console
       - name: Build Container
         id: build-container
