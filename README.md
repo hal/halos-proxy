@@ -17,7 +17,7 @@ This repository contains the proxy. The proxy is a microservice running next to 
 
 - [Quarkus](https://quarkus.io)
 - JAX-RS
-- Server Sent Events
+- Server Sent Events 
 - fabric8 [OpenShift client](https://github.com/fabric8io/kubernetes-client)
 
 ## Build
@@ -30,7 +30,7 @@ This repository contains the proxy. The proxy is a microservice running next to 
 
 Please refer to the halOS [distribution](https://github.com/hal/halos-distribution#readme) about how to set up all services on OpenShift, start halOS and access the console.
 
-## Development 
+## Development
 
 To run the proxy, you need to have access to an OpenShift cluster. The easiest way to get started is to use the [OpenShift sandbox](https://developers.redhat.com/developer-sandbox). The sandbox provides you with a private OpenShift environment in a shared, multi-tenant OpenShift cluster that is pre-configured with a set of developer tools.
 
