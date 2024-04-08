@@ -81,7 +81,7 @@
         <version.checkstyle>10.5.0</version.checkstyle>
         <version.halos.console>0.0.1</version.halos.console>
         <version.junit>5.9.1</version.junit>
-        <version.quarkus>3.9.1</version.quarkus>
+        <version.quarkus>3.9.2</version.quarkus>
 
         <!-- Plugin versions -->
         <version.checkstyle.plugin>3.3.1</version.checkstyle.plugin>
