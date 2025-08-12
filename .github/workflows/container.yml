@@ -15,10 +15,10 @@ jobs:
     steps:
       - name: Checkout Proxy
         id: checkout-proxy
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Checkout Console
         id: checkout-console
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: hal/halos-console
           path: console
